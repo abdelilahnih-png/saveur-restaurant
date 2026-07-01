@@ -400,14 +400,21 @@ a{color:inherit; text-decoration:none;}
   </div>
 </div>
 
-<!-- ============ PIN SCREEN ============ -->
+<!-- ============ LOGIN SCREEN ============ -->
 <div id="pinScreen" class="screen">
-  <div class="pin-title" data-t="enter_pin">Entrez le code PIN</div>
-  <div class="pin-dots" id="pinDots">
-    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-  </div>
-  <div class="pin-error" id="pinError"></div>
-  <div class="pin-pad" id="pinPad"></div>
+  <div class="pin-title" data-t="admin_login">Connexion administrateur</div>
+  <form id="loginForm" style="width:100%; max-width:320px; margin:0 auto; display:flex; flex-direction:column; gap:12px;" onsubmit="event.preventDefault(); adminLogin();">
+    <div class="form-group">
+      <label class="form-label" for="loginEmail">Email</label>
+      <input class="form-input" id="loginEmail" type="email" autocomplete="username" required>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="loginPassword" data-t="password">Mot de passe</label>
+      <input class="form-input" id="loginPassword" type="password" autocomplete="current-password" required>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <button type="submit" class="btn btn-gold" id="loginBtn" data-t="login">Se connecter</button>
+  </form>
 </div>
 
 <!-- ============ ADMIN APP (French only) ============ -->
@@ -650,14 +657,30 @@ const DEFAULT_MENU = [
 function supabaseConfigured(){
   return SUPABASE_URL && SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1;
 }
+function authHeader(){
+  return (typeof adminSession !== 'undefined' && adminSession && adminSession.access_token)
+    ? adminSession.access_token
+    : SUPABASE_KEY;
+}
+async function supabaseFetch(url, options, retried){
+  const res = await fetch(url, options);
+  if(res.status === 401 && !retried && typeof refreshAdminSession === 'function'){
+    const ok = await refreshAdminSession();
+    if(ok){
+      options.headers['Authorization'] = `Bearer ${authHeader()}`;
+      return supabaseFetch(url, options, true);
+    }
+  }
+  return res;
+}
 async function supabaseInsert(table, data){
   if(!supabaseConfigured()) throw new Error('not configured');
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+  const res = await supabaseFetch(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Authorization': `Bearer ${authHeader()}`,
       'Prefer': 'return=representation'
     },
     body: JSON.stringify(data)
@@ -667,21 +690,21 @@ async function supabaseInsert(table, data){
 }
 async function supabaseSelect(table, query = ''){
   if(!supabaseConfigured()) throw new Error('not configured');
-  const res = await fetch(
+  const res = await supabaseFetch(
     `${SUPABASE_URL}/rest/v1/${table}?${query}${query?'&':''}order=created_at.desc`,
-    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authHeader()}` }}
   );
   if(!res.ok) throw new Error(await res.text());
   return res.json();
 }
 async function supabaseUpdate(table, id, data){
   if(!supabaseConfigured()) throw new Error('not configured');
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+  const res = await supabaseFetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Authorization': `Bearer ${authHeader()}`,
       'Prefer': 'return=representation'
     },
     body: JSON.stringify(data)
@@ -691,12 +714,13 @@ async function supabaseUpdate(table, id, data){
 }
 async function supabaseDelete(table, id){
   if(!supabaseConfigured()) throw new Error('not configured');
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+  const res = await supabaseFetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
     method: 'DELETE',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${authHeader()}` }
   });
   if(!res.ok) throw new Error(await res.text());
 }
+
 
 /* ---------- LOCAL STORAGE CACHE LAYER ---------- */
 const LS = {
@@ -782,61 +806,98 @@ function goAdminPage(id){
   window.scrollTo(0,0);
 }
 
-/* ---------- PIN SCREEN ---------- */
-let pinBuffer = '';
+/* ---------- ADMIN AUTH (Supabase Auth: email + password) ---------- */
+let adminSession = null; // { access_token, refresh_token, expires_at }
+
 function openPinScreen(){
-  pinBuffer = '';
   document.getElementById('modeSwitch').classList.add('hidden');
   document.getElementById('pinScreen').classList.remove('hidden');
   document.getElementById('pinError').textContent = '';
-  updatePinDots();
-  buildPinPad();
 }
 function closePinScreen(){
   document.getElementById('pinScreen').classList.add('hidden');
   document.getElementById('modeSwitch').classList.remove('hidden');
 }
-function buildPinPad(){
-  const keys = [1,2,3,4,5,6,7,8,9,'',0,'del'];
-  const pad = document.getElementById('pinPad');
-  pad.innerHTML = keys.map(k=>{
-    if(k==='') return `<div class="pin-key empty"></div>`;
-    if(k==='del') return `<button class="pin-key" onclick="pinDelete()">⌫</button>`;
-    return `<button class="pin-key" onclick="pinPress(${k})">${k}</button>`;
-  }).join('');
-}
-function pinPress(n){
-  if(pinBuffer.length>=4) return;
-  pinBuffer += n;
-  updatePinDots();
-  if(pinBuffer.length===4){
-    setTimeout(()=>{
-      if(pinBuffer===ADMIN_PIN){
-        document.getElementById('pinScreen').classList.add('hidden');
-        document.getElementById('modeSwitch').classList.add('hidden');
-        document.getElementById('adminApp').classList.add('active');
-        goAdminPage('ap-dashboard');
-      } else {
-        document.getElementById('pinError').textContent = t('wrong_pin');
-        document.getElementById('pinDots').classList.add('shake');
-        setTimeout(()=>{ document.getElementById('pinDots').classList.remove('shake'); pinBuffer=''; updatePinDots(); }, 400);
-      }
-    }, 150);
+
+async function adminLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('pinError');
+  const btn = document.getElementById('loginBtn');
+  errEl.textContent = '';
+  if(!email || !password) return;
+  btn.disabled = true; btn.classList.add('btn-loading');
+  try{
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if(!res.ok || !data.access_token){
+      errEl.textContent = 'Email ou mot de passe incorrect.';
+      return;
+    }
+    adminSession = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: Date.now() + (data.expires_in*1000)
+    };
+    sessionStorage.setItem('saveur_admin_session', JSON.stringify(adminSession));
+    document.getElementById('pinScreen').classList.add('hidden');
+    document.getElementById('modeSwitch').classList.add('hidden');
+    document.getElementById('adminApp').classList.add('active');
+    goAdminPage('ap-dashboard');
+  }catch(e){
+    errEl.textContent = 'Erreur de connexion. Réessayez.';
+  }finally{
+    btn.disabled = false; btn.classList.remove('btn-loading');
   }
 }
-function pinDelete(){ pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); }
-function updatePinDots(){
-  document.querySelectorAll('#pinDots .pin-dot').forEach((d,i)=>{
-    d.classList.toggle('filled', i < pinBuffer.length);
-  });
+
+async function refreshAdminSession(){
+  if(!adminSession || !adminSession.refresh_token) return false;
+  try{
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ refresh_token: adminSession.refresh_token })
+    });
+    const data = await res.json();
+    if(!res.ok || !data.access_token) return false;
+    adminSession = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: Date.now() + (data.expires_in*1000)
+    };
+    sessionStorage.setItem('saveur_admin_session', JSON.stringify(adminSession));
+    return true;
+  }catch(e){ return false; }
 }
+
 function adminLogout(){
+  adminSession = null;
+  sessionStorage.removeItem('saveur_admin_session');
   document.getElementById('adminApp').classList.remove('active');
-  pinBuffer = '';
-  updatePinDots();
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
   document.getElementById('pinError').textContent = '';
   document.getElementById('pinScreen').classList.remove('hidden');
 }
+
+function tryRestoreAdminSession(){
+  try{
+    const saved = JSON.parse(sessionStorage.getItem('saveur_admin_session') || 'null');
+    if(saved && saved.access_token && saved.expires_at > Date.now()){
+      adminSession = saved;
+      document.getElementById('pinScreen').classList.add('hidden');
+      document.getElementById('modeSwitch').classList.add('hidden');
+      document.getElementById('adminApp').classList.add('active');
+      goAdminPage('ap-dashboard');
+    }
+  }catch(e){}
+}
+
 
 /* ============================================================
    HOME PAGE
@@ -1638,6 +1699,7 @@ async function init(){
   if(d && !d.value){ const today = new Date().toISOString().slice(0,10); d.min = today; d.value = today; resState.date = today; }
   document.getElementById('pinPad') && buildPinPad();
   startOrderPolling();
+  tryRestoreAdminSession();
 }
 document.addEventListener('DOMContentLoaded', init);
 
