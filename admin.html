@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Saveur Restaurant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#C9A84C; --gold-l:#F5EDD6; --gold-d:#8B6914;
+  --dark:#1A1209; --dark2:#2C1F0A;
+  --cream:#FAF6EE; --cream2:#F0E9D8;
+  --green:#2D6A4F; --green-l:#D8F3DC;
+  --red:#C0392B; --red-l:#FDECEA;
+  --sub:#6B5E3E; --border:#E8DCC8;
+  --radius:16px;
+  --shadow:0 4px 24px rgba(26,18,9,0.10);
+  --shadow-lg:0 8px 40px rgba(26,18,9,0.18);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Cairo',sans-serif;
+  background:var(--cream);
+  color:var(--dark);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+[dir="rtl"] body{font-family:'Cairo',sans-serif;}
+.serif{font-family:'Playfair Display',serif;}
+img,svg{display:block;max-width:100%;}
+button{font-family:inherit; cursor:pointer; border:none; background:none;}
+input,select,textarea{font-family:inherit; font-size:15px;}
+a{color:inherit; text-decoration:none;}
+.hidden{display:none !important;}
+::-webkit-scrollbar{width:0; height:0;}
+
+/* ===== layout shell ===== */
+#root{max-width:480px; margin:0 auto; min-height:100vh; position:relative; background:var(--cream); box-shadow:var(--shadow-lg);}
+.screen{min-height:100vh; display:flex; flex-direction:column;}
+
+/* ===== buttons ===== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 20px; border-radius:14px; font-weight:700; font-size:15px;
+  transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  width:100%;
+}
+.btn:active{transform:scale(.97);}
+.btn-gold{background:linear-gradient(135deg,#E6C975,var(--gold)); color:var(--dark); box-shadow:0 6px 18px rgba(201,168,76,.35);}
+.btn-outline{background:transparent; border:1.5px solid var(--gold); color:var(--gold-d);}
+.btn-dark{background:var(--dark); color:var(--gold-l);}
+.btn-green{background:var(--green); color:#fff;}
+.btn-red{background:var(--red); color:#fff;}
+.btn-sm{padding:9px 14px; font-size:13px; width:auto; border-radius:10px;}
+.btn-disabled,.btn:disabled{opacity:.45; pointer-events:none;}
+.btn-loading{position:relative; color:transparent !important;}
+.btn-loading::after{
+  content:""; position:absolute; width:18px; height:18px; border-radius:50%;
+  border:2.5px solid rgba(0,0,0,.25); border-top-color:var(--dark);
+  animation:spin .7s linear infinite;
+}
+.btn-dark.btn-loading::after,.btn-red.btn-loading::after,.btn-green.btn-loading::after{border:2.5px solid rgba(255,255,255,.35); border-top-color:#fff;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ===== mode switch screen ===== */
+#modeSwitch{
+  background:radial-gradient(circle at 30% 0%,#3a2a10,var(--dark) 60%);
+  color:var(--gold-l); padding:28px 22px 40px; min-height:100vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:6px;
+}
+.lang-switcher{display:flex; gap:8px; position:absolute; top:20px; left:50%; transform:translateX(-50%); flex-wrap:wrap; justify-content:center; width:90%;}
+.lang-switcher button{
+  padding:7px 12px; border-radius:20px; font-size:12.5px; font-weight:700;
+  border:1.5px solid var(--gold); color:var(--gold); background:transparent; transition:.2s;
+}
+.lang-switcher button.active{background:var(--gold); color:var(--dark);}
+.mode-logo-wrap{margin-top:60px; display:flex; flex-direction:column; align-items:center;}
+.mode-logo{font-family:'Playfair Display',serif; font-size:46px; color:var(--gold); font-weight:700; letter-spacing:1px;}
+.mode-sub{color:#D8C99A; font-size:14.5px; margin-top:6px; max-width:260px;}
+.divider-line{width:60px; height:2px; background:var(--gold); margin:26px 0; opacity:.6;}
+.mode-cards{display:flex; flex-direction:column; gap:14px; width:100%; max-width:320px;}
+.mode-card{
+  background:rgba(255,255,255,.04); border:1px solid rgba(201,168,76,.35);
+  border-radius:var(--radius); padding:22px; display:flex; align-items:center; gap:14px;
+  transition:.2s; text-align:left;
+}
+[dir="rtl"] .mode-card{text-align:right;}
+.mode-card:active{transform:scale(.97); background:rgba(201,168,76,.1);}
+.mode-card .mc-icon{font-size:30px;}
+.mode-card .mc-title{font-weight:700; font-size:16.5px; color:#fff;}
+.mode-card .mc-sub{font-size:12.5px; color:#B9AB82; margin-top:2px;}
+
+/* ===== PIN screen ===== */
+#pinScreen{
+  background:radial-gradient(circle at 30% 0%,#3a2a10,var(--dark) 60%);
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  color:#fff; gap:26px; padding:30px;
+}
+.pin-back{position:absolute; top:22px; left:22px; color:var(--gold); font-size:22px;}
+[dir="rtl"] .pin-back{left:auto; right:22px;}
+.pin-title{font-family:'Playfair Display',serif; font-size:22px; color:var(--gold);}
+.pin-dots{display:flex; gap:16px;}
+.pin-dot{width:16px; height:16px; border-radius:50%; border:2px solid var(--gold); transition:.15s;}
+.pin-dot.filled{background:var(--gold);}
+.pin-error{color:var(--red); font-size:13.5px; font-weight:700; min-height:18px;}
+.shake{animation:shake .4s;}
+@keyframes shake{10%,90%{transform:translateX(-4px);}20%,80%{transform:translateX(8px);}30%,50%,70%{transform:translateX(-12px);}40%,60%{transform:translateX(12px);}}
+.pin-pad{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; width:260px;}
+.pin-key{
+  width:72px; height:72px; border-radius:50%; background:rgba(255,255,255,.06);
+  border:1px solid rgba(201,168,76,.3); color:#fff; font-size:22px; font-weight:600;
+  display:flex; align-items:center; justify-content:center;
+}
+.pin-key:active{background:rgba(201,168,76,.25);}
+.pin-key.empty{visibility:hidden;}
+
+/* ===== app shell ===== */
+.app{display:none; min-height:100vh; flex-direction:column; padding-bottom:78px;}
+.app.active{display:flex;}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
+  background:var(--cream); position:sticky; top:0; z-index:30; border-bottom:1px solid var(--border);
+}
+.topbar .tb-logo{font-family:'Playfair Display',serif; font-weight:700; font-size:19px; color:var(--gold-d);}
+.lang-switcher-mini{display:flex; gap:4px;}
+.lang-switcher-mini button{font-size:16px; padding:4px; border-radius:6px; opacity:.45;}
+.lang-switcher-mini button.active{opacity:1;}
+.tb-actions{display:flex; align-items:center; gap:10px;}
+.tb-icon-btn{width:36px; height:36px; border-radius:50%; background:var(--cream2); display:flex; align-items:center; justify-content:center; font-size:16px;}
+
+.page{display:none; padding:0 0 24px; animation:fadein .25s ease;}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);}to{opacity:1; transform:translateY(0);}}
+
+.bottom-nav{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px;
+  background:#fff; border-top:1px solid var(--border); display:flex; z-index:40;
+  box-shadow:0 -4px 20px rgba(26,18,9,.06);
+}
+.bottom-nav button{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 0 8px;
+  font-size:10.5px; color:var(--sub); font-weight:600;
+}
+.bottom-nav button span.ic{font-size:19px;}
+.bottom-nav button.active{color:var(--gold-d);}
+
+/* ===== hero ===== */
+.hero{
+  background:radial-gradient(circle at 80% -10%,#3a2a10,var(--dark) 65%);
+  color:#fff; padding:26px 20px 30px; border-radius:0 0 28px 28px; position:relative; overflow:hidden;
+}
+.hero::after{content:"🍽️"; position:absolute; right:-20px; top:-10px; font-size:140px; opacity:.06;}
+[dir="rtl"] .hero::after{right:auto; left:-20px;}
+.hero-title{font-family:'Playfair Display',serif; font-size:26px; color:var(--gold); font-weight:700;}
+.hero-sub{font-size:13px; color:#D8C99A; margin-top:4px;}
+.hero-stats{display:flex; gap:10px; margin-top:18px;}
+.hstat{flex:1; background:rgba(255,255,255,.06); border:1px solid rgba(201,168,76,.25); border-radius:14px; padding:12px 8px; text-align:center;}
+.hstat b{display:block; font-size:19px; color:var(--gold); font-family:'Playfair Display',serif;}
+.hstat span{font-size:10.5px; color:#C9BD96;}
+.hours-alert{
+  margin:14px 20px 0; background:var(--gold-l); border:1px solid var(--gold); color:var(--gold-d);
+  font-size:12.5px; font-weight:700; padding:10px 14px; border-radius:12px; text-align:center;
+}
+
+/* ===== sections / cards ===== */
+.section{padding:20px 18px 4px;}
+.section-title{font-family:'Playfair Display',serif; font-weight:700; font-size:18px; color:var(--dark); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;}
+.quick-actions{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:18px;}
+.qa{display:flex; flex-direction:column; align-items:center; gap:6px; background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px 4px; box-shadow:var(--shadow);}
+.qa .ic{font-size:21px;}
+.qa span{font-size:10.5px; font-weight:700; color:var(--sub); text-align:center;}
+.qa:active{transform:scale(.95);}
+
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.dish-card{background:#fff; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); display:flex; flex-direction:column; position:relative;}
+.dish-emoji{font-size:40px; text-align:center; padding:18px 0 6px; background:var(--cream2);}
+.dish-badge{position:absolute; top:8px; left:8px; background:var(--red); color:#fff; font-size:9.5px; font-weight:800; padding:3px 8px; border-radius:8px;}
+[dir="rtl"] .dish-badge{left:auto; right:8px;}
+.dish-body{padding:10px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1;}
+.dish-name{font-weight:800; font-size:13.5px;}
+.dish-desc{font-size:11px; color:var(--sub); line-height:1.4; min-height:28px;}
+.dish-foot{display:flex; align-items:center; justify-content:space-between; margin-top:6px;}
+.dish-price{font-weight:800; color:var(--gold-d); font-size:14px;}
+.add-btn{background:var(--dark); color:var(--gold-l); font-size:11px; font-weight:700; padding:7px 10px; border-radius:9px;}
+.add-btn:active{transform:scale(.92);}
+
+.skeleton{background:linear-gradient(90deg,var(--cream2) 25%,#fff 50%,var(--cream2) 75%); background-size:200% 100%; animation:shimmer 1.3s infinite;}
+@keyframes shimmer{to{background-position:-200% 0;}}
+.sk-card{height:170px; border-radius:var(--radius);}
+
+/* ===== forms ===== */
+.form-group{margin-bottom:16px;}
+.form-label{display:block; font-size:12.5px; font-weight:700; color:var(--sub); margin-bottom:6px;}
+.form-input,.form-select,.form-textarea{
+  width:100%; padding:13px 14px; border:1.5px solid var(--border); border-radius:12px;
+  background:#fff; font-size:14.5px; color:var(--dark); transition:.15s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none; border-color:var(--gold);}
+.form-textarea{resize:none; min-height:80px;}
+.chip-group{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{padding:9px 14px; border-radius:20px; border:1.5px solid var(--border); font-size:12.5px; font-weight:700; color:var(--sub); background:#fff;}
+.chip.active{background:var(--dark); color:var(--gold-l); border-color:var(--dark);}
+.guest-stepper{display:flex; align-items:center; justify-content:space-between; background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:6px 8px;}
+.guest-stepper button{width:36px; height:36px; border-radius:50%; background:var(--cream2); font-size:18px; font-weight:700; color:var(--gold-d);}
+.guest-stepper b{font-size:16px;}
+
+/* ===== steps ===== */
+.steps-bar{display:flex; gap:8px; padding:16px 18px 4px;}
+.step-pill{flex:1; text-align:center; font-size:11.5px; font-weight:700; color:var(--sub); padding:9px 4px; border-radius:10px; background:var(--cream2); border:1px solid var(--border);}
+.step-pill.active{background:var(--dark); color:var(--gold-l); border-color:var(--dark);}
+.step-pill.done{background:var(--green-l); color:var(--green); border-color:var(--green);}
+.step-actions{display:flex; gap:10px; padding:20px 18px 8px;}
+
+/* ===== tables grid ===== */
+.zone-tabs{display:flex; gap:8px; padding:14px 18px 4px; overflow-x:auto;}
+.zone-tab{padding:9px 16px; border-radius:20px; background:#fff; border:1.5px solid var(--border); font-size:12.5px; font-weight:700; white-space:nowrap; color:var(--sub);}
+.zone-tab.active{background:var(--gold); border-color:var(--gold); color:var(--dark);}
+.legend{display:flex; gap:10px; padding:14px 18px 4px; flex-wrap:wrap;}
+.legend-item{display:flex; align-items:center; gap:5px; font-size:10.5px; color:var(--sub); font-weight:700;}
+.legend-dot{width:10px; height:10px; border-radius:4px;}
+.tables-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:14px 18px;}
+.table-cell{
+  aspect-ratio:1; border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; border:2px solid transparent; font-weight:800; color:#fff; position:relative; transition:.15s;
+}
+.table-cell.free{background:var(--green);}
+.table-cell.busy{background:var(--red); opacity:.85;}
+.table-cell.reserved{background:var(--gold-d);}
+.table-cell.soon{background:#C9882F;}
+.table-cell.selected{border-color:var(--dark); box-shadow:0 0 0 3px var(--gold-l);}
+.table-cell .tnum{font-size:15px;}
+.table-cell .tcap{font-size:9.5px; opacity:.85; font-weight:600;}
+.table-info-card{margin:14px 18px; background:#fff; border:1.5px solid var(--gold); border-radius:14px; padding:14px; font-size:13px; box-shadow:var(--shadow);}
+
+.summary-card{margin:14px 18px; background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
+.summary-row{display:flex; justify-content:space-between; padding:7px 0; font-size:13.5px; border-bottom:1px dashed var(--border);}
+.summary-row:last-child{border-bottom:none;}
+.summary-row span:first-child{color:var(--sub);}
+.summary-row b{font-weight:700;}
+.alert-box{margin:14px 18px; background:var(--gold-l); border:1px solid var(--gold); border-radius:12px; padding:12px 14px; font-size:12.5px; color:var(--gold-d); font-weight:700; text-align:center;}
+
+/* ===== cart ===== */
+.cart-floating{
+  position:fixed; bottom:88px; left:50%; transform:translateX(calc(-50% + 0px)); max-width:440px; width:88%;
+  background:var(--dark); color:#fff; border-radius:18px; padding:13px 18px; display:flex; align-items:center;
+  justify-content:space-between; box-shadow:var(--shadow-lg); z-index:45;
+}
+.cart-floating b{color:var(--gold);}
+.cart-badge{background:var(--gold); color:var(--dark); border-radius:50%; width:20px; height:20px; font-size:11px; display:inline-flex; align-items:center; justify-content:center; font-weight:800; margin-inline-start:6px;}
+.cart-item-row{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);}
+.cart-item-row .ci-emoji{font-size:24px;}
+.cart-item-row .ci-info{flex:1;}
+.cart-item-row .ci-name{font-weight:700; font-size:13.5px;}
+.cart-item-row .ci-price{font-size:11.5px; color:var(--sub);}
+.qty-ctrl{display:flex; align-items:center; gap:8px;}
+.qty-ctrl button{width:26px; height:26px; border-radius:50%; background:var(--cream2); font-weight:700; color:var(--gold-d);}
+
+/* ===== modal / bottom sheet ===== */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(26,18,9,.5); z-index:90; display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.modal-overlay.show{opacity:1; pointer-events:auto;}
+.modal-sheet{
+  background:#fff; width:100%; max-width:480px; border-radius:24px 24px 0 0; padding:20px 20px 28px; max-height:88vh; overflow-y:auto;
+  transform:translateY(100%); transition:transform .3s cubic-bezier(.32,.72,0,1);
+}
+.modal-overlay.show .modal-sheet{transform:translateY(0);}
+.sheet-handle{width:42px; height:5px; background:var(--border); border-radius:4px; margin:0 auto 16px;}
+.sheet-title{font-family:'Playfair Display',serif; font-weight:700; font-size:19px; margin-bottom:14px;}
+.sheet-close{position:absolute; top:18px; right:18px; font-size:20px; color:var(--sub);}
+[dir="rtl"] .sheet-close{right:auto; left:18px;}
+
+/* ===== toast ===== */
+.notif{
+  position:fixed; top:-100px; left:50%; transform:translateX(-50%); max-width:420px; width:90%;
+  background:var(--dark); color:#fff; padding:14px 18px; border-radius:14px; font-size:13.5px; font-weight:700;
+  text-align:center; z-index:200; box-shadow:var(--shadow-lg); transition:top .35s ease;
+}
+.notif.show{top:18px;}
+.notif.error{background:var(--red);}
+.notif.success{background:var(--green);}
+
+/* ===== reviews / stars ===== */
+.star-row{display:flex; gap:4px; font-size:24px;}
+.star{color:var(--border);}
+.star.filled{color:var(--gold);}
+.review-criterion{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.review-card{background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:10px; box-shadow:var(--shadow);}
+.review-card .rc-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+.review-card .rc-stars{color:var(--gold); font-size:13px;}
+.review-card .rc-date{font-size:10.5px; color:var(--sub);}
+.review-card .rc-comment{font-size:13px; color:var(--dark); line-height:1.5;}
+.review-card .rc-sub{font-size:10.5px; color:var(--sub); margin-top:6px;}
+
+/* ===== location ===== */
+.info-card{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin:0 18px 14px; box-shadow:var(--shadow);}
+.info-row{display:flex; align-items:center; gap:10px; padding:8px 0; font-size:13.5px;}
+.info-row .ic{font-size:18px; width:26px;}
+.map-box{
+  margin:0 18px 14px; height:170px; border-radius:var(--radius); background:
+  repeating-linear-gradient(45deg,var(--cream2),var(--cream2) 10px,#fff 10px,#fff 20px);
+  border:1.5px dashed var(--gold); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px;
+  color:var(--gold-d); font-weight:700; font-size:13px;
+}
+.howto-list{margin:0 18px; display:flex; flex-direction:column; gap:8px;}
+.howto-item{background:#fff; border:1px solid var(--border); border-radius:12px; padding:11px 14px; font-size:12.5px; display:flex; gap:10px; align-items:center;}
+
+/* ===== admin specific ===== */
+.kpi-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 18px;}
+.kpi-card{background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow:var(--shadow);}
+.kpi-card .kp-icon{font-size:18px; margin-bottom:4px;}
+.kpi-card .kp-val{font-family:'Playfair Display',serif; font-weight:700; font-size:21px; color:var(--gold-d);}
+.kpi-card .kp-label{font-size:10.5px; color:var(--sub); font-weight:700;}
+.alert-list{padding:14px 18px 0; display:flex; flex-direction:column; gap:8px;}
+.alert-item{background:var(--red-l); border:1px solid var(--red); color:var(--red); font-size:12px; font-weight:700; padding:10px 12px; border-radius:10px; display:flex; gap:8px; align-items:center;}
+.alert-item.reminder{background:var(--gold-l); border-color:var(--gold); color:var(--gold-d);}
+
+.res-table-row{background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px; box-shadow:var(--shadow);}
+.res-table-row .rt-top{display:flex; justify-content:space-between; align-items:flex-start;}
+.res-table-row .rt-name{font-weight:800; font-size:13.5px;}
+.res-table-row .rt-meta{font-size:11px; color:var(--sub); margin-top:2px;}
+.status-badge{font-size:10px; font-weight:800; padding:4px 9px; border-radius:8px;}
+.status-badge.confirmed{background:var(--green-l); color:var(--green);}
+.status-badge.pending{background:var(--gold-l); color:var(--gold-d);}
+.rt-actions{display:flex; gap:8px; margin-top:10px;}
+.rt-actions button{flex:1; padding:8px; font-size:11px; border-radius:9px; font-weight:700;}
+
+.order-card{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin:0 18px 12px; box-shadow:var(--shadow);}
+.order-card .oc-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+.order-card .oc-num{font-weight:800; font-size:14px;}
+.order-card .oc-time{font-size:10.5px; color:var(--sub);}
+.order-item-row{display:flex; justify-content:space-between; font-size:12.5px; padding:4px 0; color:var(--dark);}
+.order-card .oc-total{display:flex; justify-content:space-between; font-weight:800; padding-top:8px; border-top:1px dashed var(--border); margin-top:6px;}
+.order-card .oc-actions{display:flex; gap:8px; margin-top:10px;}
+.order-card .oc-actions button{flex:1; padding:9px; font-size:12px; border-radius:9px; font-weight:700;}
+
+.admin-dish-row{display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin:0 18px 10px; box-shadow:var(--shadow);}
+.admin-dish-row .ad-emoji{font-size:26px;}
+.admin-dish-row .ad-info{flex:1;}
+.admin-dish-row .ad-name{font-weight:800; font-size:13px;}
+.admin-dish-row .ad-meta{font-size:10.5px; color:var(--sub);}
+.admin-dish-row .ad-actions{display:flex; gap:6px;}
+.icon-btn{width:32px; height:32px; border-radius:9px; background:var(--cream2); display:flex; align-items:center; justify-content:center; font-size:13px;}
+.toggle{width:38px; height:22px; border-radius:20px; background:var(--border); position:relative; transition:.2s;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:""; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:2px; left:2px; transition:.2s;}
+.toggle.on::after{left:18px;}
+
+.bar-row{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+.bar-row .bl{width:80px; font-size:11.5px; font-weight:700; color:var(--sub);}
+.bar-track{flex:1; height:14px; background:var(--cream2); border-radius:8px; overflow:hidden;}
+.bar-fill{height:100%; background:linear-gradient(90deg,var(--gold-d),var(--gold)); border-radius:8px;}
+.bar-row .bv{width:34px; text-align:right; font-size:11.5px; font-weight:800;}
+
+.vbar-chart{display:flex; align-items:flex-end; gap:8px; height:140px; padding:0 18px; margin-top:6px;}
+.vbar-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; justify-content:flex-end; height:100%;}
+.vbar{width:100%; background:linear-gradient(180deg,var(--gold),var(--gold-d)); border-radius:6px 6px 0 0; min-height:4px;}
+.vbar-col .vl{font-size:9.5px; color:var(--sub); font-weight:700;}
+
+.donut-wrap{display:flex; align-items:center; gap:18px; padding:6px 18px;}
+.donut{width:120px; height:120px; border-radius:50%; flex-shrink:0;}
+.donut-legend{display:flex; flex-direction:column; gap:8px; font-size:12px; font-weight:700;}
+.donut-legend .dl-item{display:flex; align-items:center; gap:7px;}
+.dl-dot{width:10px; height:10px; border-radius:3px;}
+
+/* ===== print ===== */
+.print-only{display:none;}
+@media print{
+  body *{visibility:hidden;}
+  body.print-reservation #printReservation, body.print-reservation #printReservation *,
+  body.print-bill #printBill, body.print-bill #printBill *{visibility:visible;}
+  #printReservation, #printBill{
+    display:block !important; position:absolute; top:0; left:0; width:300px; margin:auto;
+    font-family:'Courier New',monospace; font-size:12px; color:#000;
+  }
+  .receipt{width:100%; padding:10px;}
+  .receipt-line{border-top:1px dashed #000; margin:8px 0;}
+  .receipt-center{text-align:center;}
+  .receipt-row{display:flex; justify-content:space-between;}
+}
+
+@media (min-width:481px){ body{background:#E8DFC8;} }
+</style>
+</head>
+<body>
+<div id="root">
+
+<!-- ============ MODE SWITCH (staff entry) ============ -->
+<div id="modeSwitch" class="screen hidden">
+  <div class="lang-switcher" id="langSwitcher1"></div>
+  <div class="mode-logo-wrap">
+    <div class="mode-logo">Saveur</div>
+    <div class="mode-sub" data-t="welcome">Bienvenue chez Saveur</div>
+    <div class="divider-line"></div>
+  </div>
+</div>
+
+<!-- ============ PIN SCREEN ============ -->
+<div id="pinScreen" class="screen">
+  <div class="pin-title" data-t="enter_pin">Entrez le code PIN</div>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+  </div>
+  <div class="pin-error" id="pinError"></div>
+  <div class="pin-pad" id="pinPad"></div>
+</div>
+
+<!-- ============ ADMIN APP (French only) ============ -->
+<div class="app" id="adminApp">
+  <div class="topbar">
+    <div class="tb-logo">Saveur — Admin</div>
+    <div class="tb-actions">
+      <button class="tb-icon-btn" title="Déconnexion" onclick="adminLogout()">🚪</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="page active" id="ap-dashboard">
+    <div class="hero">
+      <div class="hero-title">Tableau de bord</div>
+      <div class="hero-sub" id="adminDate"></div>
+    </div>
+    <div class="kpi-grid" style="margin-top:-26px;">
+      <div class="kpi-card"><div class="kp-icon">📅</div><div class="kp-val" id="kpiRes">–</div><div class="kp-label">Réservations aujourd'hui</div></div>
+      <div class="kpi-card"><div class="kp-icon">💰</div><div class="kp-val" id="kpiRevenue">–</div><div class="kp-label">Chiffre d'affaires</div></div>
+      <div class="kpi-card"><div class="kp-icon">🪑</div><div class="kp-val" id="kpiFree">–</div><div class="kp-label">Tables libres</div></div>
+      <div class="kpi-card"><div class="kp-icon">🟡</div><div class="kp-val" id="kpiPending">–</div><div class="kp-label">Commandes en attente</div></div>
+    </div>
+    <div class="alert-list" id="adminAlerts"></div>
+    <div class="section"><div class="section-title">Dernières réservations</div></div>
+    <div style="padding:0 18px;" id="adminRecentRes"></div>
+  </div>
+
+  <!-- Tables -->
+  <div class="page" id="ap-tables">
+    <div class="section" style="padding-top:18px;"><div class="section-title">Tables<button class="btn btn-sm btn-gold" onclick="openAddReservation()">+ Ajouter réservation</button></div></div>
+    <div class="legend" id="adminLegend"></div>
+    <div class="zone-tabs" id="adminZoneTabs"></div>
+    <div class="tables-grid" id="adminTablesGrid"></div>
+  </div>
+
+  <!-- Orders -->
+  <div class="page" id="ap-orders">
+    <div class="section" style="padding-top:18px;"><div class="section-title">Commandes</div></div>
+    <div class="zone-tabs" id="orderFilterTabs"></div>
+    <div id="ordersList"></div>
+  </div>
+
+  <!-- Menu management -->
+  <div class="page" id="ap-menu">
+    <div class="section" style="padding-top:18px;">
+      <div class="section-title">Menu<button class="btn btn-sm btn-gold" onclick="openDishForm()">+ Ajouter un plat</button></div>
+    </div>
+    <div id="adminMenuList"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="page" id="ap-stats">
+    <div class="section" style="padding-top:18px;"><div class="section-title">Meilleurs plats 🏆</div></div>
+    <div style="padding:0 18px;" id="topDishesChart"></div>
+
+    <div class="section"><div class="section-title">Chiffre d'affaires — 7 derniers jours 📈</div></div>
+    <div class="vbar-chart" id="revenueChart"></div>
+
+    <div class="section"><div class="section-title">Résumé des avis 💬</div></div>
+    <div style="padding:0 18px;" id="ratingsChart"></div>
+
+    <div class="section"><div class="section-title">Réservations par zone</div></div>
+    <div class="donut-wrap" id="zoneDonut"></div>
+  </div>
+
+  <nav class="bottom-nav" id="adminNav">
+    <button onclick="goAdminPage('ap-dashboard')" data-page="ap-dashboard"><span class="ic">📊</span><span>Accueil</span></button>
+    <button onclick="goAdminPage('ap-tables')" data-page="ap-tables"><span class="ic">🪑</span><span>Tables</span></button>
+    <button onclick="goAdminPage('ap-orders')" data-page="ap-orders"><span class="ic">🧾</span><span>Commandes</span></button>
+    <button onclick="goAdminPage('ap-menu')" data-page="ap-menu"><span class="ic">📖</span><span>Menu</span></button>
+    <button onclick="goAdminPage('ap-stats')" data-page="ap-stats"><span class="ic">📈</span><span>Stats</span></button>
+  </nav>
+</div>
+
+<!-- ============ SHARED MODALS ============ -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="cartModal" onclick="if(event.target===this)closeCart()">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" onclick="closeCart()">✕</button>
+    <div class="sheet-title" data-t="cart">Panier</div>
+    <div id="cartItemsList"></div>
+    <div class="summary-row" style="margin-top:10px;"><span data-t="total">Total</span><b id="cartTotal">0 MAD</b></div>
+    <button class="btn btn-gold" style="margin-top:14px;" data-t="confirm_order" onclick="confirmOrder()">Confirmer la commande 🍽️</button>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<!-- ============ PRINT TEMPLATES ============ -->
+<div id="printReservation" class="print-only">
+  <div class="receipt">
+    <div class="receipt-center"><b>🍽️ SAVEUR</b><br>Restaurant Gastronomique</div>
+    <div class="receipt-line"></div>
+    <div class="receipt-row"><span>Nom:</span><span id="pr-name"></span></div>
+    <div class="receipt-row"><span>Table:</span><span id="pr-table"></span></div>
+    <div class="receipt-row"><span>Personnes:</span><span id="pr-guests"></span></div>
+    <div class="receipt-row"><span>Date:</span><span id="pr-date"></span></div>
+    <div class="receipt-row"><span>Heure:</span><span id="pr-time"></span></div>
+    <div class="receipt-row"><span>Occasion:</span><span id="pr-occasion"></span></div>
+    <div class="receipt-line"></div>
+    <div class="receipt-center">Merci de votre visite!<br>Boulevard Anfa, Casablanca</div>
+  </div>
+</div>
+
+<div id="printBill" class="print-only">
+  <div class="receipt">
+    <div class="receipt-center"><b>🍽️ SAVEUR</b></div>
+    <div class="receipt-line"></div>
+    <div id="pb-items"></div>
+    <div class="receipt-line"></div>
+    <div class="receipt-row"><span>Sous-total:</span><span id="pb-subtotal"></span></div>
+    <div class="receipt-row"><span>TVA 20%:</span><span id="pb-tva"></span></div>
+    <div class="receipt-row"><b>TOTAL:</b><b id="pb-total"></b></div>
+    <div class="receipt-line"></div>
+    <div class="receipt-row"><span id="pb-table"></span><span id="pb-time"></span></div>
+    <div class="receipt-center">Merci et à bientôt! ✨</div>
+  </div>
+</div>
+
+</div>
+<script>
+/* ============================================================
+   SAVEUR RESTAURANT — Application JS
+   ============================================================ */
+
+/* ---------- CONFIG ---------- */
+const SUPABASE_URL = 'https://kwmgbalhvwtjymodilmn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_G_y5XzoG2xpopTy-tpyG6Q_3rqz27fq';
+const ADMIN_PIN    = '1234';
+const RESTAURANT_PHONE = '212522XXXXXX';
+const RESTAURANT_NAME  = 'Saveur Restaurant';
+const RESTAURANT_ADDRESS = 'Boulevard Anfa, Casablanca';
+const RESTAURANT_COORDS  = { lat: 33.5731, lng: -7.5898 };
+const POLL_INTERVAL = 30000;
+
+/* ---------- TRANSLATIONS ---------- */
+const LANG = {
+  fr:{welcome:"Bienvenue chez Saveur",reserve:"Réserver une table",menu:"Notre carte",location:"Nous trouver",review:"Donner un avis",confirm:"Confirmer",cancel:"Annuler",guests:"Nombre de personnes",date:"Date",time:"Heure",name:"Nom complet",phone:"Téléphone",note:"Remarques",zone_interior:"Intérieur",zone_terrace:"Terrasse",zone_vip:"VIP",occasion_birthday:"🎂 Anniversaire",occasion_anniversary:"💍 Anniversaire de couple",occasion_business:"💼 Réunion d'affaires",occasion_proposal:"💐 Fiançailles",payment_cash:"💵 Espèces à l'arrivée",payment_transfer:"🏦 Virement bancaire",table_available:"Disponible",table_busy:"Occupée",table_reserved:"Réservée",table_soon:"Bientôt libre",order_pending:"🟡 En préparation",order_done:"✅ Terminé",success_reservation:"Réservation confirmée! Nous vous contacterons. 📞",success_order:"Commande envoyée! Prête dans quelques minutes 🍽️",success_review:"Merci pour votre avis! ⭐",error_required:"Veuillez remplir tous les champs obligatoires",error_table:"Veuillez sélectionner une table",error_rating:"Veuillez compléter toutes les notes",food_quality:"Qualité de la cuisine",service:"Service",ambiance:"Ambiance",your_comment:"Votre commentaire...",send_review:"Envoyer l'avis",customer_reviews:"Avis des clients",no_reviews:"Soyez le premier à donner votre avis! ⭐",working_hours:"🕐 Horaires: 12h00 - 00h00 tous les jours",how_to_find:"Comment nous trouver",locate_me:"📡 Me localiser",open_maps:"📍 Ouvrir dans Google Maps",cart:"Panier",empty_cart:"Votre panier est vide 🛒",total:"Total",confirm_order:"Confirmer la commande 🍽️",add_to_cart:"+ Ajouter",most_ordered:"🔥 Le plus commandé",special_occasion:"Occasion spéciale?",prepayment:"Un acompte de 50 MAD est requis pour confirmer la réservation",next:"Suivant →",previous:"← Précédent",step1:"1 Détails",step2:"2 Table",step3:"3 Confirmation",dashboard:"Tableau de bord",tables:"Tables",orders:"Commandes",admin_menu:"Menu",stats:"Statistiques",today_reservations:"Réservations aujourd'hui",today_revenue:"Chiffre d'affaires",free_tables:"Tables libres",pending_orders:"Commandes en attente",add_dish:"+ Ajouter un plat",edit:"✏️ Modifier",delete:"🗑️ Supprimer",complete_order:"✅ Terminer",add_reservation:"+ Ajouter réservation",top_dishes:"Meilleurs plats 🏆",weekly_revenue:"Chiffre d'affaires — 7 derniers jours 📈",ratings_summary:"Résumé des avis 💬",send_whatsapp:"📱 Envoyer WhatsApp",print_receipt:"🖨️ Imprimer reçu",print_bill:"🖨️ Imprimer facture",enter_pin:"Entrez le code PIN",wrong_pin:"Code PIN incorrect ❌",logout:"Déconnexion",change_mode:"Changer de mode",based_on:"Basé sur",reviews_count:"avis",no_orders:"Aucune commande 🍽️",no_reservations:"Aucune réservation",complete:"Terminer",status_confirmed:"Confirmée"},
+  ar:{welcome:"مرحباً بكم في سافور",reserve:"حجز طاولة",menu:"قائمة الطعام",location:"موقعنا",review:"تقييم",confirm:"تأكيد",cancel:"إلغاء",guests:"عدد الأشخاص",date:"التاريخ",time:"الوقت",name:"الاسم الكامل",phone:"الهاتف",note:"ملاحظات",zone_interior:"داخلية",zone_terrace:"تراس",zone_vip:"VIP",occasion_birthday:"🎂 عيد ميلاد",occasion_anniversary:"💍 ذكرى سنوية",occasion_business:"💼 اجتماع عمل",occasion_proposal:"💐 خطوبة",payment_cash:"💵 نقداً عند الوصول",payment_transfer:"🏦 تحويل بنكي",table_available:"متاحة",table_busy:"مشغولة",table_reserved:"محجوزة",table_soon:"قريباً",order_pending:"🟡 قيد التحضير",order_done:"✅ مكتمل",success_reservation:"تم تأكيد حجزك! سنتصل بك قريباً 📞",success_order:"تم إرسال طلبك! سيكون جاهزاً قريباً 🍽️",success_review:"شكراً على تقييمك! ⭐",error_required:"يرجى ملء جميع الحقول المطلوبة",error_table:"يرجى اختيار طاولة",error_rating:"يرجى إكمال جميع التقييمات",food_quality:"جودة الطعام",service:"الخدمة",ambiance:"الأجواء",your_comment:"شارك تجربتك...",send_review:"إرسال التقييم ⭐",customer_reviews:"آراء الزبائن",no_reviews:"كن أول من يقيّم! ⭐",working_hours:"🕐 ساعات العمل: 12:00 - 00:00 يومياً",how_to_find:"كيف تصل إلينا",locate_me:"📡 حدد موقعي",open_maps:"📍 فتح في Google Maps",cart:"سلة الطلب",empty_cart:"السلة فارغة 🛒",total:"المجموع",confirm_order:"تأكيد الطلب 🍽️",add_to_cart:"+ إضافة",most_ordered:"🔥 الأكثر طلباً",special_occasion:"مناسبة خاصة؟",prepayment:"مطلوب دفع مسبق 50 د.م لتأكيد الحجز",next:"التالي ←",previous:"→ السابق",step1:"١ التفاصيل",step2:"٢ الطاولة",step3:"٣ التأكيد",dashboard:"لوحة التحكم",tables:"الطاولات",orders:"الطلبات",admin_menu:"المنيو",stats:"إحصاء",today_reservations:"حجوزات اليوم",today_revenue:"إيرادات اليوم",free_tables:"طاولات متاحة",pending_orders:"طلبات قيد التحضير",add_dish:"+ إضافة طبق",edit:"✏️ تعديل",delete:"🗑️ حذف",complete_order:"✅ إتمام",add_reservation:"+ إضافة حجز",top_dishes:"أفضل الأطباق 🏆",weekly_revenue:"الإيرادات — آخر 7 أيام 📈",ratings_summary:"ملخص التقييمات 💬",send_whatsapp:"📱 إرسال WhatsApp",print_receipt:"🖨️ طباعة التذكرة",print_bill:"🖨️ طباعة الفاتورة",enter_pin:"أدخل رمز PIN",wrong_pin:"رمز PIN غير صحيح ❌",logout:"خروج",change_mode:"تغيير الوضع",based_on:"مبني على",reviews_count:"تقييم",no_orders:"لا توجد طلبات 🍽️",no_reservations:"لا توجد حجوزات",complete:"إتمام",status_confirmed:"مؤكد"},
+  en:{welcome:"Welcome to Saveur",reserve:"Book a table",menu:"Our menu",location:"Find us",review:"Leave a review",confirm:"Confirm",cancel:"Cancel",guests:"Number of guests",date:"Date",time:"Time",name:"Full name",phone:"Phone",note:"Special requests",zone_interior:"Interior",zone_terrace:"Terrace",zone_vip:"VIP",occasion_birthday:"🎂 Birthday",occasion_anniversary:"💍 Anniversary",occasion_business:"💼 Business meeting",occasion_proposal:"💐 Engagement",payment_cash:"💵 Cash on arrival",payment_transfer:"🏦 Bank transfer",table_available:"Available",table_busy:"Occupied",table_reserved:"Reserved",table_soon:"Available soon",order_pending:"🟡 Preparing",order_done:"✅ Completed",success_reservation:"Reservation confirmed! We'll contact you soon 📞",success_order:"Order sent! Ready in a few minutes 🍽️",success_review:"Thank you for your review! ⭐",error_required:"Please fill in all required fields",error_table:"Please select a table",error_rating:"Please complete all ratings",food_quality:"Food quality",service:"Service",ambiance:"Ambiance",your_comment:"Share your experience...",send_review:"Send review ⭐",customer_reviews:"Customer reviews",no_reviews:"Be the first to review! ⭐",working_hours:"🕐 Hours: 12:00 PM - 12:00 AM daily",how_to_find:"How to find us",locate_me:"📡 Locate me",open_maps:"📍 Open in Google Maps",cart:"Order cart",empty_cart:"Your cart is empty 🛒",total:"Total",confirm_order:"Confirm order 🍽️",add_to_cart:"+ Add",most_ordered:"🔥 Most ordered",special_occasion:"Special occasion?",prepayment:"A 50 MAD deposit is required to confirm your reservation",next:"Next →",previous:"← Previous",step1:"1 Details",step2:"2 Table",step3:"3 Confirm",dashboard:"Dashboard",tables:"Tables",orders:"Orders",admin_menu:"Menu",stats:"Statistics",today_reservations:"Today's reservations",today_revenue:"Today's revenue",free_tables:"Free tables",pending_orders:"Pending orders",add_dish:"+ Add dish",edit:"✏️ Edit",delete:"🗑️ Delete",complete_order:"✅ Complete",add_reservation:"+ Add reservation",top_dishes:"Top dishes 🏆",weekly_revenue:"Revenue — last 7 days 📈",ratings_summary:"Ratings summary 💬",send_whatsapp:"📱 Send WhatsApp",print_receipt:"🖨️ Print receipt",print_bill:"🖨️ Print bill",enter_pin:"Enter PIN code",wrong_pin:"Wrong PIN code ❌",logout:"Logout",change_mode:"Change mode",based_on:"Based on",reviews_count:"reviews",no_orders:"No orders 🍽️",no_reservations:"No reservations",complete:"Complete",status_confirmed:"Confirmed"},
+  es:{welcome:"Bienvenido a Saveur",reserve:"Reservar una mesa",menu:"Nuestra carta",location:"Encuéntranos",review:"Dejar una reseña",confirm:"Confirmar",cancel:"Cancelar",guests:"Número de personas",date:"Fecha",time:"Hora",name:"Nombre completo",phone:"Teléfono",note:"Observaciones",zone_interior:"Interior",zone_terrace:"Terraza",zone_vip:"VIP",occasion_birthday:"🎂 Cumpleaños",occasion_anniversary:"💍 Aniversario",occasion_business:"💼 Reunión de negocios",occasion_proposal:"💐 Compromiso",payment_cash:"💵 Efectivo al llegar",payment_transfer:"🏦 Transferencia bancaria",table_available:"Disponible",table_busy:"Ocupada",table_reserved:"Reservada",table_soon:"Disponible pronto",order_pending:"🟡 En preparación",order_done:"✅ Completado",success_reservation:"¡Reserva confirmada! Te contactaremos pronto 📞",success_order:"¡Pedido enviado! Listo en unos minutos 🍽️",success_review:"¡Gracias por tu reseña! ⭐",error_required:"Por favor completa todos los campos obligatorios",error_table:"Por favor selecciona una mesa",error_rating:"Por favor completa todas las valoraciones",food_quality:"Calidad de la comida",service:"Servicio",ambiance:"Ambiente",your_comment:"Comparte tu experiencia...",send_review:"Enviar reseña ⭐",customer_reviews:"Reseñas de clientes",no_reviews:"¡Sé el primero en opinar! ⭐",working_hours:"🕐 Horario: 12:00 - 00:00 todos los días",how_to_find:"Cómo encontrarnos",locate_me:"📡 Localizarme",open_maps:"📍 Abrir en Google Maps",cart:"Carrito",empty_cart:"Tu carrito está vacío 🛒",total:"Total",confirm_order:"Confirmar pedido 🍽️",add_to_cart:"+ Añadir",most_ordered:"🔥 Más pedido",special_occasion:"¿Ocasión especial?",prepayment:"Se requiere un depósito de 50 MAD para confirmar la reserva",next:"Siguiente →",previous:"← Anterior",step1:"1 Detalles",step2:"2 Mesa",step3:"3 Confirmar",dashboard:"Panel de control",tables:"Mesas",orders:"Pedidos",admin_menu:"Menú",stats:"Estadísticas",today_reservations:"Reservas de hoy",today_revenue:"Ingresos de hoy",free_tables:"Mesas libres",pending_orders:"Pedidos pendientes",add_dish:"+ Añadir plato",edit:"✏️ Editar",delete:"🗑️ Eliminar",complete_order:"✅ Completar",add_reservation:"+ Añadir reserva",top_dishes:"Mejores platos 🏆",weekly_revenue:"Ingresos — últimos 7 días 📈",ratings_summary:"Resumen de valoraciones 💬",send_whatsapp:"📱 Enviar WhatsApp",print_receipt:"🖨️ Imprimir recibo",print_bill:"🖨️ Imprimir factura",enter_pin:"Introducir código PIN",wrong_pin:"Código PIN incorrecto ❌",logout:"Cerrar sesión",change_mode:"Cambiar modo",based_on:"Basado en",reviews_count:"reseñas",no_orders:"Sin pedidos 🍽️",no_reservations:"Sin reservas",complete:"Completar",status_confirmed:"Confirmada"}
+};
+
+let currentLang = localStorage.getItem('saveur_lang') || 'fr';
+const LANG_FLAGS = {fr:'🇫🇷',ar:'🇲🇦',en:'🇬🇧',es:'🇪🇸'};
+const LANG_NAMES = {fr:'FR',ar:'AR',en:'EN',es:'ES'};
+const MODE_SUB = {
+  fr:{c:"Espace client — réserver, commander, avis", a:"Espace administration"},
+  ar:{c:"فضاء العميل — حجز، طلب، تقييم", a:"فضاء الإدارة"},
+  en:{c:"Customer space — book, order, review", a:"Admin space"},
+  es:{c:"Espacio cliente — reservar, pedir, opinar", a:"Espacio de administración"}
+};
+
+function t(key){ return (LANG[currentLang] && LANG[currentLang][key]) || LANG['fr'][key] || key; }
+
+function setLang(lang){
+  currentLang = lang;
+  localStorage.setItem('saveur_lang', lang);
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+  translateAll();
+}
+
+function buildLangSwitchers(){
+  const mk = (mini)=>{
+    return Object.keys(LANG_FLAGS).map(l=>
+      `<button class="${l===currentLang?'active':''}" onclick="setLang('${l}')">${LANG_FLAGS[l]}${mini?'':' '+LANG_NAMES[l]}</button>`
+    ).join('');
+  };
+  document.getElementById('langSwitcher1').innerHTML = mk(false);
+  const mini = document.getElementById('langSwitcherMini');
+  if(mini) mini.innerHTML = mk(true);
+}
+
+function translateAll(){
+  buildLangSwitchers();
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    el.textContent = t(el.dataset.t);
+  });
+  document.querySelectorAll('[data-t-ph]').forEach(el=>{
+    el.placeholder = t(el.dataset.tPh);
+  });
+  if(document.getElementById('clientApp')){
+    renderZoneChips(); renderOccasionChips(); renderPaymentChips();
+    renderResStepsBar(); renderLegend('resLegend'); renderZoneTabs('resZoneTabs','resState');
+    renderTablesGrid('resTablesGrid','res');
+    renderMenuCatTabs(); renderMenu();
+    renderReviews(); renderHomeSpecials(); renderHomeStats();
+    renderCart();
+    renderStarRows();
+    document.getElementById('howtoBus').textContent = t('how_to_find')==="How to find us" ? "Bus: lines 12, 30, 47 — Anfa stop" : (currentLang==='ar' ? 'حافلة: خطوط 12، 30، 47 — محطة أنفا' : currentLang==='es' ? 'Bus: líneas 12, 30, 47 — parada Anfa' : 'Bus: lignes 12, 30, 47 — arrêt Anfa');
+  }
+  buildTimeOptions();
+}
+
+/* ---------- STATIC DATA ---------- */
+const TABLES_DATA = [
+  {id:1,  num:"T1",  cap:2,  zone:"interior", status:"free"},
+  {id:2,  num:"T2",  cap:2,  zone:"interior", status:"busy",     name:"Fatima"},
+  {id:3,  num:"T3",  cap:4,  zone:"interior", status:"free"},
+  {id:4,  num:"T4",  cap:4,  zone:"interior", status:"reserved", name:"Mohammed", time:"20:00"},
+  {id:5,  num:"T5",  cap:6,  zone:"interior", status:"free"},
+  {id:6,  num:"T6",  cap:6,  zone:"interior", status:"busy",     name:"Ahmed"},
+  {id:7,  num:"T7",  cap:2,  zone:"terrace",  status:"free"},
+  {id:8,  num:"T8",  cap:4,  zone:"terrace",  status:"soon",     name:"Sara",    time:"20:30"},
+  {id:9,  num:"T9",  cap:4,  zone:"terrace",  status:"free"},
+  {id:10, num:"T10", cap:6,  zone:"terrace",  status:"busy",     name:"Youssef"},
+  {id:11, num:"V1",  cap:8,  zone:"vip",      status:"free"},
+  {id:12, num:"V2",  cap:10, zone:"vip",      status:"reserved", name:"Company XYZ", time:"21:00"},
+];
+
+const DEFAULT_MENU = [
+  {category:"Entrées",          name:"Salade fraîche",    emoji:"🥗", price:45,  description:"Salade de saison vinaigrette citron",   popular:false, active:true},
+  {category:"Entrées",          name:"Soupe à l'oignon",  emoji:"🍲", price:55,  description:"Soupe française au fromage gratiné",     popular:true,  active:true},
+  {category:"Entrées",          name:"Tartare de saumon", emoji:"🐟", price:85,  description:"Saumon frais avocat câpres",             popular:false, active:true},
+  {category:"Entrées",          name:"Champignons farcis",emoji:"🍄", price:60,  description:"Champignons farcis fromage herbes",      popular:false, active:true},
+  {category:"Plats principaux", name:"Steak Oscar",       emoji:"🥩", price:180, description:"Entrecôte sauce béarnaise et homard",    popular:true,  active:true},
+  {category:"Plats principaux", name:"Dorade grillée",    emoji:"🐠", price:150, description:"Dorade grillée ail citron herbes",       popular:false, active:true},
+  {category:"Plats principaux", name:"Confit de poulet",  emoji:"🍗", price:120, description:"Cuisse de poulet confite herbes de Provence", popular:false, active:true},
+  {category:"Plats principaux", name:"Crevettes grillées",emoji:"🦐", price:160, description:"Crevettes royales épices marocaines",   popular:true,  active:true},
+  {category:"Plats principaux", name:"Couscous royal",    emoji:"🍛", price:130, description:"Couscous aux 7 viandes traditionnel",   popular:true,  active:true},
+  {category:"Desserts",         name:"Crème brûlée",      emoji:"🍮", price:55,  description:"Classique français vanille Madagascar", popular:true,  active:true},
+  {category:"Desserts",         name:"Banane flambée",    emoji:"🍌", price:65,  description:"Banane caramel glace vanille",          popular:false, active:true},
+  {category:"Desserts",         name:"Cheesecake",        emoji:"🍰", price:60,  description:"Cheesecake coulis fraises fraîches",    popular:false, active:true},
+  {category:"Boissons",         name:"Jus frais",         emoji:"🍊", price:30,  description:"Orange / Mangue / Pastèque",            popular:false, active:true},
+  {category:"Boissons",         name:"Thé à la menthe",   emoji:"🍵", price:25,  description:"Atay marocain authentique",             popular:true,  active:true},
+  {category:"Boissons",         name:"Boissons gazeuses", emoji:"🥤", price:20,  description:"Coca-Cola / Fanta / Sprite",            popular:false, active:true},
+];
+
+/* ---------- SUPABASE REST HELPERS ---------- */
+function supabaseConfigured(){
+  return SUPABASE_URL && SUPABASE_URL.indexOf('YOUR_SUPABASE') === -1;
+}
+async function supabaseInsert(table, data){
+  if(!supabaseConfigured()) throw new Error('not configured');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(data)
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+async function supabaseSelect(table, query = ''){
+  if(!supabaseConfigured()) throw new Error('not configured');
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/${table}?${query}${query?'&':''}order=created_at.desc`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
+  );
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+async function supabaseUpdate(table, id, data){
+  if(!supabaseConfigured()) throw new Error('not configured');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(data)
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+async function supabaseDelete(table, id){
+  if(!supabaseConfigured()) throw new Error('not configured');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if(!res.ok) throw new Error(await res.text());
+}
+
+/* ---------- LOCAL STORAGE CACHE LAYER ---------- */
+const LS = {
+  get(key, fallback){ try{ const v = localStorage.getItem('saveur_'+key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } },
+  set(key, val){ try{ localStorage.setItem('saveur_'+key, JSON.stringify(val)); }catch(e){} }
+};
+
+let STATE = {
+  tables: LS.get('tables', JSON.parse(JSON.stringify(TABLES_DATA))),
+  menu: LS.get('menu', null),
+  reservations: LS.get('reservations', []),
+  orders: LS.get('orders', []),
+  reviews: LS.get('reviews', []),
+  cart: [],
+};
+
+async function initMenu(){
+  try{
+    if(supabaseConfigured()){
+      let items = await supabaseSelect('menu_items');
+      if(!items || items.length===0){
+        for(const dish of DEFAULT_MENU){ await supabaseInsert('menu_items', dish); }
+        items = await supabaseSelect('menu_items');
+      }
+      STATE.menu = items;
+      LS.set('menu', items);
+    } else if(!STATE.menu){
+      STATE.menu = DEFAULT_MENU.map((d,i)=>({...d, id:i+1}));
+      LS.set('menu', STATE.menu);
+    }
+  }catch(e){
+    if(!STATE.menu){ STATE.menu = DEFAULT_MENU.map((d,i)=>({...d, id:i+1})); LS.set('menu', STATE.menu); }
+  }
+}
+
+/* ---------- TOAST ---------- */
+let notifTimer;
+function showToast(msg, type){
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.className = 'notif show' + (type ? ' '+type : '');
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(()=>{ el.classList.remove('show'); }, 3000);
+}
+
+/* ---------- BUTTON LOADING HELPER ---------- */
+function withLoading(btn, fn){
+  return async function(...args){
+    btn.classList.add('btn-loading'); btn.disabled = true;
+    try{ await fn(...args); }
+    finally{ btn.classList.remove('btn-loading'); btn.disabled = false; }
+  };
+}
+
+/* ---------- NAVIGATION ---------- */
+function goCustomer(){
+  document.getElementById('modeSwitch').classList.add('hidden');
+  document.getElementById('clientApp').classList.add('active');
+  goPage('cp-home');
+}
+function backToModeSwitch(){
+  document.getElementById('clientApp').classList.remove('active');
+  document.getElementById('adminApp').classList.remove('active');
+  document.getElementById('modeSwitch').classList.remove('hidden');
+}
+function goPage(id){
+  document.querySelectorAll('#clientApp .page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('#clientNav button').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
+  if(id==='cp-menu') document.getElementById('cartFloat').classList.toggle('hidden', STATE.cart.length===0);
+  else document.getElementById('cartFloat').classList.add('hidden');
+  window.scrollTo(0,0);
+}
+function goAdminPage(id){
+  document.querySelectorAll('#adminApp .page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('#adminNav button').forEach(b=>b.classList.toggle('active', b.dataset.page===id));
+  if(id==='ap-dashboard') renderAdminDashboard();
+  if(id==='ap-tables') renderAdminTables('all');
+  if(id==='ap-orders') renderAdminOrders('all');
+  if(id==='ap-menu') renderAdminMenu();
+  if(id==='ap-stats') renderAdminStats();
+  window.scrollTo(0,0);
+}
+
+/* ---------- PIN SCREEN ---------- */
+let pinBuffer = '';
+function openPinScreen(){
+  pinBuffer = '';
+  document.getElementById('modeSwitch').classList.add('hidden');
+  document.getElementById('pinScreen').classList.remove('hidden');
+  document.getElementById('pinError').textContent = '';
+  updatePinDots();
+  buildPinPad();
+}
+function closePinScreen(){
+  document.getElementById('pinScreen').classList.add('hidden');
+  document.getElementById('modeSwitch').classList.remove('hidden');
+}
+function buildPinPad(){
+  const keys = [1,2,3,4,5,6,7,8,9,'',0,'del'];
+  const pad = document.getElementById('pinPad');
+  pad.innerHTML = keys.map(k=>{
+    if(k==='') return `<div class="pin-key empty"></div>`;
+    if(k==='del') return `<button class="pin-key" onclick="pinDelete()">⌫</button>`;
+    return `<button class="pin-key" onclick="pinPress(${k})">${k}</button>`;
+  }).join('');
+}
+function pinPress(n){
+  if(pinBuffer.length>=4) return;
+  pinBuffer += n;
+  updatePinDots();
+  if(pinBuffer.length===4){
+    setTimeout(()=>{
+      if(pinBuffer===ADMIN_PIN){
+        document.getElementById('pinScreen').classList.add('hidden');
+        document.getElementById('modeSwitch').classList.add('hidden');
+        document.getElementById('adminApp').classList.add('active');
+        goAdminPage('ap-dashboard');
+      } else {
+        document.getElementById('pinError').textContent = t('wrong_pin');
+        document.getElementById('pinDots').classList.add('shake');
+        setTimeout(()=>{ document.getElementById('pinDots').classList.remove('shake'); pinBuffer=''; updatePinDots(); }, 400);
+      }
+    }, 150);
+  }
+}
+function pinDelete(){ pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); }
+function updatePinDots(){
+  document.querySelectorAll('#pinDots .pin-dot').forEach((d,i)=>{
+    d.classList.toggle('filled', i < pinBuffer.length);
+  });
+}
+function adminLogout(){
+  document.getElementById('adminApp').classList.remove('active');
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+  document.getElementById('pinScreen').classList.remove('hidden');
+}
+
+/* ============================================================
+   HOME PAGE
+   ============================================================ */
+function renderHomeStats(){
+  const free = STATE.tables.filter(tb=>tb.status==='free').length;
+  document.getElementById('statFreeTables').textContent = free;
+  document.getElementById('statMenuCount').textContent = (STATE.menu||[]).filter(m=>m.active!==false).length;
+  const revs = STATE.reviews;
+  let avg = '–';
+  if(revs.length){
+    const sum = revs.reduce((s,r)=> s + (r.food+r.service+r.ambiance)/3, 0);
+    avg = (sum/revs.length).toFixed(1);
+  }
+  document.getElementById('statAvgRating').textContent = avg;
+  document.getElementById('statReviewsBased').textContent = revs.length ? `(${revs.length} ${t('reviews_count')})` : '';
+}
+function renderHomeSpecials(){
+  const wrap = document.getElementById('homeSpecials');
+  const popular = (STATE.menu||[]).filter(m=>m.popular && m.active!==false).slice(0,4);
+  if(!popular.length){ wrap.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`; return; }
+  wrap.innerHTML = popular.map(dishCardHTML).join('');
+}
+function dishCardHTML(d){
+  return `<div class="dish-card">
+    ${d.popular?`<div class="dish-badge">${t('most_ordered')}</div>`:''}
+    <div class="dish-emoji">${d.emoji}</div>
+    <div class="dish-body">
+      <div class="dish-name">${escapeHtml(d.name)}</div>
+      <div class="dish-desc">${escapeHtml(d.description||'')}</div>
+      <div class="dish-foot">
+        <span class="dish-price">${d.price} MAD</span>
+        <button class="add-btn" onclick="addToCart(${d.id})">${t('add_to_cart')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ============================================================
+   RESERVATION FLOW
+   ============================================================ */
+let resState = { step:1, name:'', phone:'', date:'', time:'', guests:2, zone:'interior', occasion:null, note:'', table:null, payment:'cash' };
+
+function buildTimeOptions(){
+  const sel = document.getElementById('resTime');
+  if(!sel) return;
+  const cur = sel.value;
+  let opts = '';
+  for(let h=12; h<=23; h++){
+    for(let m of [0,30]){
+      if(h===23 && m===30) { opts += `<option value="23:30">23:30</option>`; continue; }
+      const hh = h.toString().padStart(2,'0'), mm = m.toString().padStart(2,'0');
+      opts += `<option value="${hh}:${mm}">${hh}:${mm}</option>`;
+    }
+  }
+  sel.innerHTML = opts;
+  if(cur) sel.value = cur;
+}
+(function setMinDate(){
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const d = document.getElementById('resDate');
+    if(d){ const today = new Date().toISOString().slice(0,10); d.min = today; d.value = today; resState.date = today; }
+  });
+})();
+
+function changeGuests(delta){
+  resState.guests = Math.max(1, Math.min(12, resState.guests + delta));
+  document.getElementById('guestCount').textContent = resState.guests >= 11 ? '10+' : resState.guests;
+}
+
+function renderZoneChips(){
+  const wrap = document.getElementById('resZoneChips');
+  if(!wrap) return;
+  const zones = [['interior','zone_interior'],['terrace','zone_terrace'],['vip','zone_vip']];
+  wrap.innerHTML = zones.map(([z,k])=>`<button class="chip ${resState.zone===z?'active':''}" onclick="setResZone('${z}')">${t(k)}</button>`).join('');
+}
+function setResZone(z){ resState.zone = z; renderZoneChips(); renderZoneTabs('resZoneTabs','resState'); renderTablesGrid('resTablesGrid','res'); }
+
+function renderOccasionChips(){
+  const wrap = document.getElementById('resOccasionChips');
+  if(!wrap) return;
+  const occ = [['birthday','occasion_birthday'],['anniversary','occasion_anniversary'],['business','occasion_business'],['proposal','occasion_proposal']];
+  wrap.innerHTML = occ.map(([o,k])=>`<button class="chip ${resState.occasion===o?'active':''}" onclick="setOccasion('${o}')">${t(k)}</button>`).join('');
+}
+function setOccasion(o){ resState.occasion = (resState.occasion===o) ? null : o; renderOccasionChips(); }
+
+function renderPaymentChips(){
+  const wrap = document.getElementById('resPaymentChips');
+  if(!wrap) return;
+  const pay = [['cash','payment_cash'],['transfer','payment_transfer']];
+  wrap.innerHTML = pay.map(([p,k])=>`<button class="chip ${resState.payment===p?'active':''}" onclick="setPayment('${p}')">${t(k)}</button>`).join('');
+}
+function setPayment(p){ resState.payment = p; renderPaymentChips(); }
+
+function renderResStepsBar(){
+  const wrap = document.getElementById('resStepsBar');
+  if(!wrap) return;
+  const steps = [['step1',1],['step2',2],['step3',3]];
+  wrap.innerHTML = steps.map(([k,n])=>{
+    const cls = n===resState.step ? 'active' : (n<resState.step ? 'done':'');
+    return `<div class="step-pill ${cls}">${t(k)}</div>`;
+  }).join('');
+}
+
+function resGoStep(n){
+  if(resState.step===1 && n===2){
+    resState.name = document.getElementById('resName').value.trim();
+    resState.phone = document.getElementById('resPhone').value.trim();
+    resState.date = document.getElementById('resDate').value;
+    resState.time = document.getElementById('resTime').value;
+    resState.note = document.getElementById('resNote').value.trim();
+    if(!resState.name || !resState.phone || !resState.date || !resState.time){
+      showToast(t('error_required'), 'error'); return;
+    }
+  }
+  if(resState.step===2 && n===3){
+    if(!resState.table){ showToast(t('error_table'),'error'); return; }
+    renderResSummary();
+  }
+  resState.step = n;
+  document.getElementById('resStep1').classList.toggle('hidden', n!==1);
+  document.getElementById('resStep2').classList.toggle('hidden', n!==2);
+  document.getElementById('resStep3').classList.toggle('hidden', n!==3);
+  renderResStepsBar();
+  if(n===2) renderTablesGrid('resTablesGrid','res');
+  window.scrollTo(0,0);
+}
+
+function renderLegend(targetId){
+  const wrap = document.getElementById(targetId);
+  if(!wrap) return;
+  const items = [['free','table_available','var(--green)'],['busy','table_busy','var(--red)'],['reserved','table_reserved','var(--gold-d)'],['soon','table_soon','#C9882F']];
+  wrap.innerHTML = items.map(([s,k,c])=>`<div class="legend-item"><span class="legend-dot" style="background:${c}"></span>${t(k)}</div>`).join('');
+}
+function renderZoneTabs(targetId, mode){
+  const wrap = document.getElementById(targetId);
+  if(!wrap) return;
+  const activeZone = mode==='resState' ? resState.zone : (window.adminZoneFilter||'all');
+  const zones = mode==='resState'
+    ? [['interior','zone_interior'],['terrace','zone_terrace'],['vip','zone_vip']]
+    : [['all','tables'],['interior','zone_interior'],['terrace','zone_terrace'],['vip','zone_vip']];
+  wrap.innerHTML = zones.map(([z,k])=>{
+    const onclick = mode==='resState' ? `setResZone('${z}')` : `setAdminZoneFilter('${z}')`;
+    return `<button class="zone-tab ${activeZone===z?'active':''}" onclick="${onclick}">${t(k)}</button>`;
+  }).join('');
+}
+
+function renderTablesGrid(targetId, mode){
+  const wrap = document.getElementById(targetId);
+  if(!wrap) return;
+  let list = STATE.tables;
+  if(mode==='res') list = list.filter(tb=>tb.zone===resState.zone);
+  else {
+    const f = window.adminZoneFilter||'all';
+    if(f!=='all') list = list.filter(tb=>tb.zone===f);
+  }
+  wrap.innerHTML = list.map(tb=>{
+    const sel = mode==='res' && resState.table===tb.id ? 'selected' : '';
+    const onclick = mode==='res' ? `selectResTable(${tb.id})` : `openTableSheet(${tb.id})`;
+    return `<button class="table-cell ${tb.status} ${sel}" onclick="${onclick}">
+      <span class="tnum">${tb.num}</span><span class="tcap">${tb.cap}p</span>
+    </button>`;
+  }).join('');
+}
+function selectResTable(id){
+  const tb = STATE.tables.find(x=>x.id===id);
+  if(tb.status!=='free'){ showToast(t('error_table'),'error'); return; }
+  resState.table = id;
+  renderTablesGrid('resTablesGrid','res');
+  const info = document.getElementById('resTableInfo');
+  info.classList.remove('hidden');
+  info.innerHTML = `<b>${tb.num}</b> — ${tb.cap} ${t('guests')} — ${t('zone_'+tb.zone) }`;
+}
+
+function renderResSummary(){
+  const tb = STATE.tables.find(x=>x.id===resState.table);
+  const wrap = document.getElementById('resSummary');
+  wrap.innerHTML = `
+    <div class="summary-row"><span>${t('name')}</span><b>${escapeHtml(resState.name)}</b></div>
+    <div class="summary-row"><span>${t('phone')}</span><b>${escapeHtml(resState.phone)}</b></div>
+    <div class="summary-row"><span>${t('date')}</span><b>${resState.date}</b></div>
+    <div class="summary-row"><span>${t('time')}</span><b>${resState.time}</b></div>
+    <div class="summary-row"><span>${t('guests')}</span><b>${resState.guests}</b></div>
+    <div class="summary-row"><span>${t('tables')}</span><b>${tb?tb.num:'-'}</b></div>
+    ${resState.occasion?`<div class="summary-row"><span>${t('special_occasion')}</span><b>${t('occasion_'+resState.occasion)}</b></div>`:''}
+    ${resState.note?`<div class="summary-row"><span>${t('note')}</span><b>${escapeHtml(resState.note)}</b></div>`:''}
+  `;
+}
+
+async function submitReservation(){
+  const btn = document.getElementById('resConfirmBtn');
+  const tb = STATE.tables.find(x=>x.id===resState.table);
+  // business rule: check same date+time+table not already reserved
+  const clash = STATE.reservations.find(r=>r.table_num===tb.num && r.date===resState.date && r.time===resState.time);
+  if(clash){ showToast(t('error_table'),'error'); return; }
+
+  const reservation = {
+    name: resState.name, phone: resState.phone, date: resState.date, time: resState.time,
+    guests: resState.guests, zone: resState.zone, table_num: tb.num, occasion: resState.occasion,
+    note: resState.note, payment: resState.payment, lang: currentLang, status: 'confirmed',
+    created_at: new Date().toISOString()
+  };
+
+  await withLoading(btn, async ()=>{
+    try{
+      if(supabaseConfigured()){
+        await supabaseInsert('reservations', reservation);
+      }
+    }catch(e){ /* fallback to localStorage below */ }
+    reservation.id = Date.now();
+    STATE.reservations.unshift(reservation);
+    LS.set('reservations', STATE.reservations);
+    tb.status = 'reserved'; tb.name = resState.name; tb.time = resState.time;
+    LS.set('tables', STATE.tables);
+    showToast(t('success_reservation'), 'success');
+    resetReservationForm();
+    goPage('cp-home');
+    renderHomeStats();
+  })();
+}
+function resetReservationForm(){
+  resState = { step:1, name:'', phone:'', date:document.getElementById('resDate').value, time:'', guests:2, zone:'interior', occasion:null, note:'', table:null, payment:'cash' };
+  document.getElementById('resName').value=''; document.getElementById('resPhone').value=''; document.getElementById('resNote').value='';
+  document.getElementById('guestCount').textContent='2';
+  document.getElementById('resTableInfo').classList.add('hidden');
+  resGoStep(1);
+  renderZoneChips(); renderOccasionChips(); renderPaymentChips();
+  renderTablesGrid('resTablesGrid','res');
+}
+
+/* ============================================================
+   MENU & CART
+   ============================================================ */
+let activeMenuCat = 'all';
+function getCategories(){
+  const cats = [...new Set((STATE.menu||[]).map(m=>m.category))];
+  return cats;
+}
+function renderMenuCatTabs(){
+  const wrap = document.getElementById('menuCatTabs');
+  if(!wrap) return;
+  const cats = getCategories();
+  wrap.innerHTML = `<button class="zone-tab ${activeMenuCat==='all'?'active':''}" onclick="setMenuCat('all')">${currentLang==='ar'?'الكل':currentLang==='en'?'All':currentLang==='es'?'Todo':'Tout'}</button>` +
+    cats.map(c=>`<button class="zone-tab ${activeMenuCat===c?'active':''}" onclick="setMenuCat('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join('');
+}
+function setMenuCat(c){ activeMenuCat = c; renderMenuCatTabs(); renderMenu(); }
+
+function renderMenu(){
+  const wrap = document.getElementById('menuList');
+  if(!wrap) return;
+  if(!STATE.menu){ wrap.innerHTML = `<div class="grid-2"><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div></div>`; return; }
+  let items = STATE.menu.filter(m=>m.active!==false);
+  if(activeMenuCat!=='all') items = items.filter(m=>m.category===activeMenuCat);
+  const cats = activeMenuCat==='all' ? getCategories() : [activeMenuCat];
+  let html = '';
+  cats.forEach(cat=>{
+    const inCat = items.filter(m=>m.category===cat);
+    if(!inCat.length) return;
+    html += `<div class="section-title" style="padding:0; margin:14px 0 10px;">${escapeHtml(cat)}</div>
+      <div class="grid-2">${inCat.map(dishCardHTML).join('')}</div>`;
+  });
+  wrap.innerHTML = html || `<p style="text-align:center; color:var(--sub); padding:30px 0;">—</p>`;
+}
+
+function addToCart(dishId){
+  const dish = (STATE.menu||[]).find(d=>d.id===dishId);
+  if(!dish) return;
+  const existing = STATE.cart.find(c=>c.id===dishId);
+  if(existing) existing.qty++;
+  else STATE.cart.push({ id:dish.id, name:dish.name, emoji:dish.emoji, price:dish.price, qty:1 });
+  renderCart();
+  showToast(t('add_to_cart')+' '+dish.emoji, 'success');
+}
+function changeCartQty(id, delta){
+  const item = STATE.cart.find(c=>c.id===id);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty<=0) STATE.cart = STATE.cart.filter(c=>c.id!==id);
+  renderCart();
+}
+function cartTotal(){ return STATE.cart.reduce((s,c)=>s+c.price*c.qty,0); }
+function renderCart(){
+  const count = STATE.cart.reduce((s,c)=>s+c.qty,0);
+  const total = cartTotal();
+  const cartFloat = document.getElementById('cartFloat');
+  if(cartFloat){
+    cartFloat.classList.toggle('hidden', count===0 || !document.getElementById('cp-menu').classList.contains('active'));
+    document.getElementById('cartCount').textContent = count;
+    document.getElementById('cartTotalFloat').textContent = total+' MAD';
+  }
+  const list = document.getElementById('cartItemsList');
+  if(list){
+    if(!STATE.cart.length){
+      list.innerHTML = `<p style="text-align:center; color:var(--sub); padding:24px 0;">${t('empty_cart')}</p>`;
+    } else {
+      list.innerHTML = STATE.cart.map(c=>`
+        <div class="cart-item-row">
+          <span class="ci-emoji">${c.emoji}</span>
+          <span class="ci-info"><span class="ci-name">${escapeHtml(c.name)}</span><br><span class="ci-price">${c.price} MAD</span></span>
+          <span class="qty-ctrl">
+            <button onclick="changeCartQty(${c.id},-1)">−</button>
+            <b>${c.qty}</b>
+            <button onclick="changeCartQty(${c.id},1)">+</button>
+          </span>
+        </div>`).join('');
+    }
+    document.getElementById('cartTotal').textContent = total+' MAD';
+  }
+}
+function openCart(){ if(!STATE.cart.length){ showToast(t('empty_cart')); return; } renderCart(); document.getElementById('cartModal').classList.add('show'); }
+function closeCart(){ document.getElementById('cartModal').classList.remove('show'); }
+
+async function confirmOrder(){
+  if(!STATE.cart.length){ showToast(t('empty_cart')); return; }
+  const btn = event.currentTarget;
+  const order = {
+    items: STATE.cart.map(c=>({name:c.name, emoji:c.emoji, qty:c.qty, price:c.price})),
+    total: cartTotal(), status: 'pending', lang: currentLang,
+    created_at: new Date().toISOString()
+  };
+  await withLoading(btn, async ()=>{
+    try{ if(supabaseConfigured()) await supabaseInsert('orders', order); }catch(e){}
+    order.id = Date.now();
+    STATE.orders.unshift(order);
+    LS.set('orders', STATE.orders);
+    showToast(t('success_order'), 'success');
+    STATE.cart = [];
+    renderCart();
+    closeCart();
+  })();
+}
+
+/* ============================================================
+   LOCATION
+   ============================================================ */
+function openMaps(){
+  const {lat,lng} = RESTAURANT_COORDS;
+  window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+}
+function haversine(lat1,lon1,lat2,lon2){
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function locateMe(){
+  const out = document.getElementById('distanceResult');
+  if(!navigator.geolocation){ out.textContent = '—'; return; }
+  out.textContent = '...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const d = haversine(pos.coords.latitude, pos.coords.longitude, RESTAURANT_COORDS.lat, RESTAURANT_COORDS.lng);
+    out.textContent = `📍 ${d.toFixed(1)} km`;
+  }, ()=>{ out.textContent = '—'; showToast(t('error_required'),'error'); });
+}
+
+/* ============================================================
+   REVIEWS
+   ============================================================ */
+let reviewRatings = { food:0, service:0, ambiance:0 };
+function renderStarRows(){
+  document.querySelectorAll('.star-row').forEach(row=>{
+    const crit = row.dataset.crit;
+    row.innerHTML = [1,2,3,4,5].map(i=>`<span class="star ${i<=reviewRatings[crit]?'filled':''}" onclick="setStarRating('${crit}',${i})">★</span>`).join('');
+  });
+}
+function setStarRating(crit, val){ reviewRatings[crit] = val; renderStarRows(); }
+
+async function submitReview(){
+  if(!reviewRatings.food || !reviewRatings.service || !reviewRatings.ambiance){
+    showToast(t('error_rating'), 'error'); return;
+  }
+  const btn = event.currentTarget;
+  const review = {
+    food: reviewRatings.food, service: reviewRatings.service, ambiance: reviewRatings.ambiance,
+    comment: document.getElementById('reviewComment').value.trim(),
+    lang: currentLang, created_at: new Date().toISOString()
+  };
+  await withLoading(btn, async ()=>{
+    try{ if(supabaseConfigured()) await supabaseInsert('reviews', review); }catch(e){}
+    review.id = Date.now();
+    STATE.reviews.unshift(review);
+    LS.set('reviews', STATE.reviews);
+    showToast(t('success_review'), 'success');
+    reviewRatings = {food:0,service:0,ambiance:0};
+    renderStarRows();
+    document.getElementById('reviewComment').value = '';
+    renderReviews();
+    renderHomeStats();
+  })();
+}
+function renderReviews(){
+  const wrap = document.getElementById('reviewsList');
+  if(!wrap) return;
+  const list = STATE.reviews.slice(0,10);
+  if(!list.length){ wrap.innerHTML = `<p style="text-align:center; color:var(--sub); padding:20px 0;">${t('no_reviews')}</p>`; return; }
+  wrap.innerHTML = list.map(r=>{
+    const avg = ((r.food+r.service+r.ambiance)/3).toFixed(1);
+    const date = new Date(r.created_at).toLocaleDateString();
+    return `<div class="review-card">
+      <div class="rc-top"><span class="rc-stars">★ ${avg}</span><span class="rc-date">${date}</span></div>
+      ${r.comment?`<div class="rc-comment">${escapeHtml(r.comment)}</div>`:''}
+      <div class="rc-sub">${t('food_quality')}: ${r.food} · ${t('service')}: ${r.service} · ${t('ambiance')}: ${r.ambiance}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   MODAL (bottom sheet) HELPERS
+   ============================================================ */
+function openModal(html){
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+
+/* ============================================================
+   ADMIN — DASHBOARD
+   ============================================================ */
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function renderAdminDashboard(){
+  document.getElementById('adminDate').textContent = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  const today = todayStr();
+  const resToday = STATE.reservations.filter(r=>r.date===today);
+  const revenueToday = STATE.orders.filter(o=>o.created_at && o.created_at.slice(0,10)===today).reduce((s,o)=>s+o.total,0);
+  const free = STATE.tables.filter(tb=>tb.status==='free').length;
+  const pending = STATE.orders.filter(o=>o.status==='pending').length;
+  document.getElementById('kpiRes').textContent = resToday.length;
+  document.getElementById('kpiRevenue').textContent = revenueToday + ' MAD';
+  document.getElementById('kpiFree').textContent = free;
+  document.getElementById('kpiPending').textContent = pending;
+
+  const alerts = [];
+  const now = Date.now();
+  STATE.orders.filter(o=>o.status==='pending').forEach(o=>{
+    if(now - new Date(o.created_at).getTime() > 5*60*1000){
+      alerts.push(`<div class="alert-item">⚠️ Commande #${o.id.toString().slice(-4)} en attente depuis plus de 5 min</div>`);
+    }
+  });
+  resToday.forEach(r=>{
+    const resDateTime = new Date(`${r.date}T${r.time}`);
+    const diffMin = (resDateTime.getTime()-now)/60000;
+    if(diffMin>0 && diffMin<=30){
+      alerts.push(`<div class="alert-item reminder">⏰ Réservation de ${escapeHtml(r.name)} dans ${Math.round(diffMin)} min</div>`);
+    }
+  });
+  document.getElementById('adminAlerts').innerHTML = alerts.join('');
+
+  const recent = STATE.reservations.slice(0,10);
+  const wrap = document.getElementById('adminRecentRes');
+  if(!recent.length){ wrap.innerHTML = `<p style="text-align:center; color:var(--sub); padding:16px 0;">${t('no_reservations')}</p>`; }
+  else {
+    wrap.innerHTML = recent.map(r=>`
+      <div class="res-table-row">
+        <div class="rt-top">
+          <span><span class="rt-name">${escapeHtml(r.name)}</span><div class="rt-meta">${r.time} · ${r.table_num} · ${r.guests} pers.</div></span>
+          <span class="status-badge confirmed">${t('status_confirmed')}</span>
+        </div>
+        <div class="rt-actions">
+          <button class="btn-green" style="border-radius:9px;" onclick='sendWhatsApp(${JSON.stringify(r)})'>📱 WhatsApp</button>
+          <button class="btn-outline" style="border-radius:9px;" onclick='printReservation(${JSON.stringify(r)})'>🖨️ Reçu</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+/* ============================================================
+   ADMIN — TABLES
+   ============================================================ */
+window.adminZoneFilter = 'all';
+function setAdminZoneFilter(z){ window.adminZoneFilter = z; renderAdminTables(z); }
+function renderAdminTables(zone){
+  renderLegend('adminLegend');
+  renderZoneTabs('adminZoneTabs','admin');
+  renderTablesGrid('adminTablesGrid','admin');
+}
+function openTableSheet(id){
+  const tb = STATE.tables.find(x=>x.id===id);
+  const statusLabel = {free:t('table_available'),busy:t('table_busy'),reserved:t('table_reserved'),soon:t('table_soon')};
+  openModal(`
+    <div class="sheet-title">${tb.num} — ${tb.cap} pers. (${t('zone_'+tb.zone)})</div>
+    ${tb.name?`<p style="margin-bottom:10px;">👤 <b>${escapeHtml(tb.name)}</b> ${tb.time?'· '+tb.time:''}</p>`:''}
+    <p style="margin-bottom:14px; color:var(--sub); font-size:13px;">Statut actuel: <b>${statusLabel[tb.status]}</b></p>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="btn btn-green" onclick="setTableStatus(${id},'free')">Libre</button>
+      <button class="btn btn-red" onclick="setTableStatus(${id},'busy')">Occupée</button>
+      <button class="btn btn-dark" onclick="setTableStatus(${id},'reserved')">Réservée</button>
+      ${tb.status!=='free'?`<button class="btn btn-outline" onclick='printReservation({name:"${escapeHtml(tb.name||"")}",table_num:"${tb.num}",guests:${tb.cap},date:"${todayStr()}",time:"${tb.time||""}",occasion:""})'>🖨️ Imprimer reçu</button>`:''}
+    </div>
+  `);
+}
+function setTableStatus(id, status){
+  const tb = STATE.tables.find(x=>x.id===id);
+  tb.status = status;
+  if(status==='free'){ delete tb.name; delete tb.time; }
+  LS.set('tables', STATE.tables);
+  try{ if(supabaseConfigured()) supabaseUpdate('tables', id, {status}); }catch(e){}
+  closeModal();
+  renderAdminTables(window.adminZoneFilter);
+  renderHomeStats();
+}
+function openAddReservation(){
+  const freeTables = STATE.tables.filter(tb=>tb.status==='free');
+  openModal(`
+    <div class="sheet-title">${t('add_reservation')}</div>
+    <div class="form-group"><label class="form-label">${t('name')}</label><input class="form-input" id="qrName"></div>
+    <div class="form-group"><label class="form-label">${t('phone')}</label><input class="form-input" id="qrPhone"></div>
+    <div class="form-group"><label class="form-label">${t('date')}</label><input class="form-input" type="date" id="qrDate" value="${todayStr()}"></div>
+    <div class="form-group"><label class="form-label">${t('time')}</label><input class="form-input" type="time" id="qrTime"></div>
+    <div class="form-group"><label class="form-label">${t('guests')}</label><input class="form-input" type="number" id="qrGuests" value="2" min="1"></div>
+    <div class="form-group"><label class="form-label">Table</label>
+      <select class="form-select" id="qrTable">${freeTables.map(tb=>`<option value="${tb.id}">${tb.num} (${tb.cap}p, ${t('zone_'+tb.zone)})</option>`).join('')}</select>
+    </div>
+    <button class="btn btn-gold" onclick="quickAddReservation()">${t('confirm')}</button>
+  `);
+}
+async function quickAddReservation(){
+  const tbId = parseInt(document.getElementById('qrTable').value);
+  const tb = STATE.tables.find(x=>x.id===tbId);
+  const name = document.getElementById('qrName').value.trim();
+  const phone = document.getElementById('qrPhone').value.trim();
+  if(!name || !phone || !tb){ showToast(t('error_required'),'error'); return; }
+  const reservation = {
+    name, phone, date: document.getElementById('qrDate').value, time: document.getElementById('qrTime').value,
+    guests: parseInt(document.getElementById('qrGuests').value)||1, zone: tb.zone, table_num: tb.num,
+    occasion:null, note:'', payment:'cash', lang:'fr', status:'confirmed', created_at:new Date().toISOString(), id:Date.now()
+  };
+  try{ if(supabaseConfigured()) await supabaseInsert('reservations', reservation); }catch(e){}
+  STATE.reservations.unshift(reservation);
+  LS.set('reservations', STATE.reservations);
+  tb.status='reserved'; tb.name=name; tb.time=reservation.time;
+  LS.set('tables', STATE.tables);
+  closeModal();
+  showToast(t('success_reservation'),'success');
+  renderAdminDashboard(); renderAdminTables(window.adminZoneFilter);
+}
+
+/* ============================================================
+   ADMIN — ORDERS
+   ============================================================ */
+let orderFilter = 'all';
+function renderOrderFilterTabs(){
+  const wrap = document.getElementById('orderFilterTabs');
+  const tabs = [['all','Tous'],['pending','En préparation'],['done','Terminés']];
+  wrap.innerHTML = tabs.map(([k,label])=>`<button class="zone-tab ${orderFilter===k?'active':''}" onclick="setOrderFilter('${k}')">${label}</button>`).join('');
+}
+function setOrderFilter(f){ orderFilter = f; renderOrderFilterTabs(); renderAdminOrders(f); }
+function renderAdminOrders(filter){
+  renderOrderFilterTabs();
+  const wrap = document.getElementById('ordersList');
+  let list = STATE.orders;
+  if(filter && filter!=='all') list = list.filter(o=>o.status===filter);
+  if(!list.length){ wrap.innerHTML = `<p style="text-align:center; color:var(--sub); padding:30px 0;">${t('no_orders')}</p>`; return; }
+  wrap.innerHTML = list.map(o=>{
+    const time = new Date(o.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="order-card">
+      <div class="oc-top">
+        <span class="oc-num">#${o.id.toString().slice(-4)}</span>
+        <span class="oc-time">${time}</span>
+        <span class="status-badge ${o.status==='pending'?'pending':'confirmed'}">${o.status==='pending'?t('order_pending'):t('order_done')}</span>
+      </div>
+      ${o.items.map(it=>`<div class="order-item-row"><span>${it.emoji} ${escapeHtml(it.name)} ×${it.qty}</span><span>${it.price*it.qty} MAD</span></div>`).join('')}
+      <div class="oc-total"><span>${t('total')}</span><span>${o.total} MAD</span></div>
+      <div class="oc-actions">
+        ${o.status==='pending'?`<button class="btn-green" style="border-radius:9px;" onclick="completeOrder(${o.id})">✅ Terminer</button>`:''}
+        ${o.phone?`<button class="btn-outline" style="border-radius:9px;" onclick='sendOrderWhatsApp(${JSON.stringify(o)})'>📱 WhatsApp</button>`:''}
+        <button class="btn-outline" style="border-radius:9px;" onclick='printBill(${JSON.stringify(o)})'>🖨️ Facture</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function completeOrder(id){
+  const o = STATE.orders.find(x=>x.id===id);
+  o.status = 'done';
+  LS.set('orders', STATE.orders);
+  try{ if(supabaseConfigured()) await supabaseUpdate('orders', id, {status:'done'}); }catch(e){}
+  renderAdminOrders(orderFilter);
+  renderAdminDashboard();
+}
+function startOrderPolling(){
+  setInterval(async ()=>{
+    if(!supabaseConfigured()) return;
+    try{
+      const orders = await supabaseSelect('orders');
+      STATE.orders = orders; LS.set('orders', orders);
+      if(document.getElementById('ap-orders').classList.contains('active')) renderAdminOrders(orderFilter);
+      renderAdminDashboard();
+    }catch(e){}
+  }, POLL_INTERVAL);
+}
+
+/* ============================================================
+   ADMIN — MENU MANAGEMENT
+   ============================================================ */
+function renderAdminMenu(){
+  const wrap = document.getElementById('adminMenuList');
+  if(!STATE.menu){ wrap.innerHTML = `<div class="skeleton sk-card" style="margin:0 18px;"></div>`; return; }
+  wrap.innerHTML = STATE.menu.map(d=>`
+    <div class="admin-dish-row">
+      <span class="ad-emoji">${d.emoji}</span>
+      <span class="ad-info">
+        <span class="ad-name">${escapeHtml(d.name)}</span>
+        <div class="ad-meta">${escapeHtml(d.category)} · ${d.price} MAD ${d.popular?'· 🔥':''}</div>
+      </span>
+      <span class="ad-actions">
+        <button class="toggle ${d.active!==false?'on':''}" onclick="toggleDishActive(${d.id})"></button>
+        <button class="icon-btn" onclick="openDishForm(${d.id})">✏️</button>
+        <button class="icon-btn" onclick="deleteDish(${d.id})">🗑️</button>
+      </span>
+    </div>`).join('');
+}
+function toggleDishActive(id){
+  const d = STATE.menu.find(x=>x.id===id);
+  d.active = d.active===false ? true : false;
+  LS.set('menu', STATE.menu);
+  try{ if(supabaseConfigured()) supabaseUpdate('menu_items', id, {active:d.active}); }catch(e){}
+  renderAdminMenu(); renderMenu();
+}
+function openDishForm(id){
+  const d = id ? STATE.menu.find(x=>x.id===id) : null;
+  openModal(`
+    <div class="sheet-title">${d?t('edit'):t('add_dish')}</div>
+    <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="dfEmoji" value="${d?d.emoji:'🍽️'}"></div>
+    <div class="form-group"><label class="form-label">Catégorie</label><input class="form-input" id="dfCategory" value="${d?escapeHtml(d.category):''}"></div>
+    <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="dfName" value="${d?escapeHtml(d.name):''}"></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="dfDesc">${d?escapeHtml(d.description||''):''}</textarea></div>
+    <div class="form-group"><label class="form-label">Prix (MAD)</label><input class="form-input" type="number" id="dfPrice" value="${d?d.price:''}"></div>
+    <div class="form-group" style="display:flex; align-items:center; justify-content:space-between;">
+      <label class="form-label" style="margin:0;">${t('most_ordered')}</label>
+      <button class="toggle ${d&&d.popular?'on':''}" id="dfPopularToggle" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <button class="btn btn-gold" onclick="saveDish(${d?d.id:'null'})">${t('confirm')}</button>
+  `);
+}
+async function saveDish(id){
+  const dish = {
+    emoji: document.getElementById('dfEmoji').value.trim() || '🍽️',
+    category: document.getElementById('dfCategory').value.trim(),
+    name: document.getElementById('dfName').value.trim(),
+    description: document.getElementById('dfDesc').value.trim(),
+    price: parseFloat(document.getElementById('dfPrice').value) || 0,
+    popular: document.getElementById('dfPopularToggle').classList.contains('on'),
+    active: true
+  };
+  if(!dish.name || !dish.category){ showToast(t('error_required'),'error'); return; }
+  if(id){
+    const existing = STATE.menu.find(x=>x.id===id);
+    Object.assign(existing, dish);
+    try{ if(supabaseConfigured()) await supabaseUpdate('menu_items', id, dish); }catch(e){}
+  } else {
+    dish.id = Date.now();
+    STATE.menu.push(dish);
+    try{ if(supabaseConfigured()) await supabaseInsert('menu_items', dish); }catch(e){}
+  }
+  LS.set('menu', STATE.menu);
+  closeModal();
+  renderAdminMenu(); renderMenu(); renderMenuCatTabs(); renderHomeSpecials();
+}
+function deleteDish(id){
+  openModal(`
+    <div class="sheet-title">${t('delete')}</div>
+    <p style="margin-bottom:16px; color:var(--sub);">Confirmer la suppression de ce plat ?</p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-outline" onclick="closeModal()">${t('cancel')}</button>
+      <button class="btn btn-red" onclick="confirmDeleteDish(${id})">${t('delete')}</button>
+    </div>
+  `);
+}
+async function confirmDeleteDish(id){
+  STATE.menu = STATE.menu.filter(x=>x.id!==id);
+  LS.set('menu', STATE.menu);
+  try{ if(supabaseConfigured()) await supabaseDelete('menu_items', id); }catch(e){}
+  closeModal();
+  renderAdminMenu(); renderMenu(); renderMenuCatTabs();
+}
+
+/* ============================================================
+   ADMIN — STATISTICS
+   ============================================================ */
+function renderAdminStats(){
+  // Top 5 dishes from orders
+  const counts = {};
+  STATE.orders.forEach(o=>o.items.forEach(it=>{ counts[it.name] = (counts[it.name]||0) + it.qty; }));
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxCount = top.length ? top[0][1] : 1;
+  document.getElementById('topDishesChart').innerHTML = top.length ? top.map(([name,c])=>`
+    <div class="bar-row"><span class="bl">${escapeHtml(name)}</span><div class="bar-track"><div class="bar-fill" style="width:${(c/maxCount*100)}%"></div></div><span class="bv">${c}</span></div>
+  `).join('') : `<p style="color:var(--sub); text-align:center;">—</p>`;
+
+  // Revenue last 7 days
+  const days = [];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().slice(0,10)); }
+  const revByDay = days.map(d=> STATE.orders.filter(o=>o.created_at && o.created_at.slice(0,10)===d).reduce((s,o)=>s+o.total,0));
+  const maxRev = Math.max(...revByDay, 1);
+  document.getElementById('revenueChart').innerHTML = days.map((d,i)=>{
+    const h = Math.max(4, (revByDay[i]/maxRev*120));
+    const label = new Date(d).toLocaleDateString('fr-FR',{weekday:'short'});
+    return `<div class="vbar-col"><div class="vbar" style="height:${h}px;" title="${revByDay[i]} MAD"></div><span class="vl">${label}</span></div>`;
+  }).join('');
+
+  // Ratings summary
+  const revs = STATE.reviews;
+  const avgOf = key => revs.length ? (revs.reduce((s,r)=>s+r[key],0)/revs.length) : 0;
+  const ratings = [['food_quality', avgOf('food')],['service', avgOf('service')],['ambiance', avgOf('ambiance')]];
+  document.getElementById('ratingsChart').innerHTML = ratings.map(([k,v])=>`
+    <div class="bar-row"><span class="bl">${t(k)}</span><div class="bar-track"><div class="bar-fill" style="width:${(v/5*100)}%"></div></div><span class="bv">${v.toFixed(1)}</span></div>
+  `).join('');
+
+  // Reservations by zone donut
+  const zones = ['interior','terrace','vip'];
+  const zoneColors = {interior:'#C9A84C', terrace:'#2D6A4F', vip:'#8B6914'};
+  const zoneCounts = zones.map(z=>STATE.reservations.filter(r=>r.zone===z).length);
+  const totalRes = zoneCounts.reduce((a,b)=>a+b,0) || 1;
+  let acc = 0;
+  const gradParts = zones.map((z,i)=>{
+    const pct = zoneCounts[i]/totalRes*100;
+    const part = `${zoneColors[z]} ${acc}% ${acc+pct}%`;
+    acc += pct;
+    return part;
+  });
+  document.getElementById('zoneDonut').innerHTML = `
+    <div class="donut" style="background:conic-gradient(${gradParts.join(',')});"></div>
+    <div class="donut-legend">${zones.map(z=>`<div class="dl-item"><span class="dl-dot" style="background:${zoneColors[z]}"></span>${t('zone_'+z)} (${STATE.reservations.filter(r=>r.zone===z).length})</div>`).join('')}</div>
+  `;
+}
+
+/* ============================================================
+   WHATSAPP INTEGRATION
+   ============================================================ */
+function sendWhatsApp(reservation){
+  const messages = {
+    fr: `Bonjour ${reservation.name}! ✅\nVotre réservation chez ${RESTAURANT_NAME} est confirmée.\n\n📅 Date: ${reservation.date}\n🕐 Heure: ${reservation.time}\n🪑 Table: ${reservation.table_num}\n👥 Personnes: ${reservation.guests}\n${reservation.occasion ? '🎉 Occasion: ' + reservation.occasion : ''}\n\nNous vous attendons!\n📍 ${RESTAURANT_ADDRESS}`,
+    ar: `مرحباً ${reservation.name}! ✅\nتم تأكيد حجزك في ${RESTAURANT_NAME}\n\n📅 التاريخ: ${reservation.date}\n🕐 الوقت: ${reservation.time}\n🪑 الطاولة: ${reservation.table_num}\n👥 الأشخاص: ${reservation.guests}\n\nنتطلع لاستقبالك!\n📍 ${RESTAURANT_ADDRESS}`,
+    en: `Hello ${reservation.name}! ✅\nYour reservation at ${RESTAURANT_NAME} is confirmed.\n\n📅 Date: ${reservation.date}\n🕐 Time: ${reservation.time}\n🪑 Table: ${reservation.table_num}\n👥 Guests: ${reservation.guests}\n\nWe look forward to welcoming you!\n📍 ${RESTAURANT_ADDRESS}`,
+    es: `¡Hola ${reservation.name}! ✅\nTu reserva en ${RESTAURANT_NAME} está confirmada.\n\n📅 Fecha: ${reservation.date}\n🕐 Hora: ${reservation.time}\n🪑 Mesa: ${reservation.table_num}\n👥 Personas: ${reservation.guests}\n\n¡Te esperamos!\n📍 ${RESTAURANT_ADDRESS}`
+  };
+  const lang = reservation.lang || 'fr';
+  const msg = encodeURIComponent(messages[lang]);
+  const phone = (reservation.phone||'').replace(/\D/g,'');
+  window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+}
+function sendOrderWhatsApp(order){
+  const itemsList = order.items.map(it=>`${it.emoji||''} ${it.name} ×${it.qty}`).join('\n');
+  const messages = {
+    fr: `Bonjour! ✅\nVotre commande chez ${RESTAURANT_NAME} est confirmée et en préparation.\n\n🧾 Commande:\n${itemsList}\n\n💰 Total: ${order.total} MAD\n\nElle sera prête dans quelques minutes!\n📍 ${RESTAURANT_ADDRESS}`,
+    ar: `مرحباً! ✅\nتم تأكيد طلبكم في ${RESTAURANT_NAME} وهو قيد التحضير.\n\n🧾 الطلب:\n${itemsList}\n\n💰 المجموع: ${order.total} درهم\n\nسيكون جاهزاً خلال دقائق!\n📍 ${RESTAURANT_ADDRESS}`,
+    en: `Hello! ✅\nYour order at ${RESTAURANT_NAME} is confirmed and being prepared.\n\n🧾 Order:\n${itemsList}\n\n💰 Total: ${order.total} MAD\n\nIt will be ready in a few minutes!\n📍 ${RESTAURANT_ADDRESS}`,
+    es: `¡Hola! ✅\nTu pedido en ${RESTAURANT_NAME} está confirmado y en preparación.\n\n🧾 Pedido:\n${itemsList}\n\n💰 Total: ${order.total} MAD\n\n¡Estará listo en unos minutos!\n📍 ${RESTAURANT_ADDRESS}`
+  };
+  const lang = order.lang || 'fr';
+  const msg = encodeURIComponent(messages[lang]);
+  const phone = (order.phone||'').replace(/\D/g,'');
+  if(!phone){ showToast(t('error_required'), 'error'); return; }
+  window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+}
+
+/* ============================================================
+   PRINT SYSTEM
+   ============================================================ */
+function printReservation(r){
+  document.getElementById('pr-name').textContent = r.name||'';
+  document.getElementById('pr-table').textContent = r.table_num||'';
+  document.getElementById('pr-guests').textContent = r.guests||'';
+  document.getElementById('pr-date').textContent = r.date||'';
+  document.getElementById('pr-time').textContent = r.time||'';
+  document.getElementById('pr-occasion').textContent = r.occasion ? t('occasion_'+r.occasion) : '—';
+  document.body.classList.add('print-reservation');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('print-reservation'), 500);
+}
+function printBill(order){
+  const subtotal = order.total;
+  const tva = +(subtotal*0.2/1.2).toFixed(2);
+  const sub = +(subtotal-tva).toFixed(2);
+  document.getElementById('pb-items').innerHTML = order.items.map(it=>
+    `<div class="receipt-row"><span>${it.emoji} ${it.name} ×${it.qty}</span><span>${it.price*it.qty} MAD</span></div>`
+  ).join('');
+  document.getElementById('pb-subtotal').textContent = sub+' MAD';
+  document.getElementById('pb-tva').textContent = tva+' MAD';
+  document.getElementById('pb-total').textContent = subtotal+' MAD';
+  document.getElementById('pb-table').textContent = '';
+  document.getElementById('pb-time').textContent = new Date(order.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  document.body.classList.add('print-bill');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('print-bill'), 500);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function init(){
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = currentLang;
+  await initMenu();
+  translateAll();
+  buildTimeOptions();
+  const d = document.getElementById('resDate');
+  if(d && !d.value){ const today = new Date().toISOString().slice(0,10); d.min = today; d.value = today; resState.date = today; }
+  document.getElementById('pinPad') && buildPinPad();
+  startOrderPolling();
+}
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
